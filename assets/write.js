@@ -228,7 +228,7 @@
       });
   }
 
-  /** 若曾用 :bind 选择过仓库根目录，则写入本机磁盘（与 Git 仓同路径）；失败不影响 localStorage */
+  /** 若曾用 :bind 选过「项目根」（含 assets/、scenes/ 的那一层），则写入该本机目录；浏览器不允许脚本未经弹窗写死路径。 */
   function persistToDisk(relPath, text) {
     return idbGetRoot().then(function (root) {
       if (!root) return;
@@ -362,7 +362,7 @@
       persistToDisk(rel, text),
       persistToDisk("scenes/index.json", JSON.stringify(idx, null, 2)),
     ]).catch(function () {
-      flashHint("本机仓库目录写入失败（可检查 :bind 权限）；内容已在 localStorage。");
+      flashHint("项目目录写入失败（权限或 :bind 路径）；内容已在 localStorage。");
     });
     buf.value = "";
     saveDraft();
@@ -436,7 +436,7 @@
       persistToDisk(rel, text),
       persistToDisk("tech/index.json", JSON.stringify(list, null, 2)),
     ]).catch(function () {
-      flashHint("本机仓库目录写入失败；内容已在 localStorage。");
+      flashHint("项目目录写入失败；内容已在 localStorage。");
     });
     buf.value = "";
     saveDraft();
@@ -449,7 +449,7 @@
     hideCmdUi();
     if (typeof window.showDirectoryPicker !== "function") {
       flashHint(
-        "当前浏览器不支持选择文件夹（需 Chrome / Edge）。归档仍会留在 localStorage，清除站点数据前不会丢。"
+        "当前浏览器不能选本地文件夹（请用 Chrome / Edge）。换浏览器后可用 :bind：在弹窗里选中你的项目根目录（含 assets、scenes 的那一层，例如 a_opus_plan_version）。"
       );
       setMode("insert");
       buf.focus();
@@ -459,11 +459,13 @@
       .showDirectoryPicker({ mode: "readwrite" })
       .then(function (dir) {
         return idbPutRoot(dir).then(function () {
-          flashHint("已绑定本机仓库根目录；此后 :wq / :t 会同步写入 scenes/、tech/ 与 index.json。");
+          flashHint(
+            "已绑定为当前选中的项目根目录。此后 :wq / :t 会写入该目录下的 scenes/、tech/ 与 index.json（与你在资源管理器里打开的是同一棵树）。"
+          );
         });
       })
       .catch(function () {
-        flashHint("未绑定目录（已取消）。");
+        flashHint("未绑定（已取消）。仍可只用 localStorage；要写入本机项目请再执行 :bind 并选中 a_opus_plan_version 根目录。");
       })
       .finally(function () {
         setMode("insert");
