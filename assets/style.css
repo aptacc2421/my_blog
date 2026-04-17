@@ -1,0 +1,265 @@
+/* 视觉地基：老城夕阳 + 落灰 — 霞鹜文楷 / EB Garamond，暗金 · 灰蓝 · 红砖 · 落灰 */
+@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap");
+
+@font-face {
+  font-family: "LXGW WenKai";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/files/lxgwwenkai-regular-subset.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "LXGW WenKai";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/files/lxgwwenkai-medium-subset.woff2") format("woff2");
+}
+
+:root {
+  --bg-void: #0e0c0a;
+  --bg-deep: #151311;
+  --bg-mist: #1c1916;
+  --text-ash: #d8cfc2;
+  --text-dust: #9a9187;
+  --text-faint: #6a6560;
+  --gold-dim: #9a8a5e;
+  --gold: #c9b06a;
+  --gold-bright: #dcc47a;
+  --slate: #5c6a78;
+  --slate-deep: #3d4852;
+  --brick: #8f4a42;
+  --brick-shadow: #5c2f2a;
+  --serif-zh: "LXGW WenKai", "PingFang SC", "Hiragino Sans GB", serif;
+  --serif-en: "EB Garamond", "LXGW WenKai", Georgia, serif;
+  --mono-atmos: "Consolas", "DejaVu Sans Mono", ui-monospace, monospace;
+  --write-size: 0.95rem;
+  --write-line: 1.75;
+  --fragment-max: 22rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: var(--serif-zh), var(--serif-en);
+  font-size: var(--write-size);
+  line-height: var(--write-line);
+  letter-spacing: 0.02em;
+  color: var(--text-ash);
+  background: var(--bg-deep);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* —— 门厅 —— */
+body.gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: radial-gradient(ellipse 120% 80% at 50% 100%, #1a1512 0%, var(--bg-void) 55%);
+  color: var(--text-ash);
+}
+
+body.gate main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.75rem;
+}
+
+body.gate a {
+  font-family: var(--serif-zh), var(--serif-en);
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: var(--gold);
+  text-decoration: none;
+  text-underline-offset: 0.35em;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+body.gate a:hover {
+  color: var(--gold-bright);
+  text-decoration: underline;
+  text-decoration-color: var(--brick);
+}
+
+/* —— 生活侧 —— */
+body.life {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: var(--bg-void);
+  color: var(--text-ash);
+}
+
+#atmos {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  margin: 0;
+  padding: 1.5vmin;
+  white-space: pre;
+  font-family: var(--mono-atmos);
+  font-size: clamp(7px, 1.1vmin, 11px);
+  line-height: 1.05;
+  color: var(--slate);
+  opacity: 0.28;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  filter: contrast(0.92) saturate(0.85);
+}
+
+body.life .fragment {
+  position: absolute;
+  max-width: var(--fragment-max);
+  padding: 0;
+  font-family: var(--serif-zh), var(--serif-en);
+  font-size: clamp(0.82rem, 1.1vw, 0.95rem);
+  line-height: var(--write-line);
+  color: var(--text-ash);
+  opacity: 0.88;
+  text-shadow: 0 0 1.25em rgba(14, 12, 10, 0.85), 0 1px 0 rgba(20, 18, 16, 0.4);
+  pointer-events: none;
+  hyphens: auto;
+}
+
+body.life .fragment p {
+  margin: 0 0 0.6em;
+}
+
+body.life .fragment p:last-child {
+  margin-bottom: 0;
+}
+
+body.life .back-gate {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 2;
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  text-decoration: none;
+  opacity: 0.45;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+body.life .back-gate:hover {
+  opacity: 0.85;
+  color: var(--gold-dim);
+}
+
+body.life .dust-footnote {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  font-size: calc(var(--write-size) * 0.6);
+  letter-spacing: 0.12em;
+  color: var(--slate-deep);
+  opacity: 0.35;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 36rem) {
+  body.life .dust-footnote {
+    left: 1rem;
+    right: 1rem;
+    transform: none;
+    text-align: center;
+    white-space: normal;
+  }
+}
+
+/* —— 写作页 —— */
+body.write {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg-deep);
+  color: var(--text-ash);
+}
+
+body.write #buf {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 6vmin 8vmin 4.5rem;
+  border: none;
+  resize: none;
+  font-family: var(--serif-zh), var(--serif-en);
+  font-size: var(--write-size);
+  line-height: var(--write-line);
+  letter-spacing: 0.03em;
+  color: var(--text-ash);
+  background: linear-gradient(165deg, var(--bg-mist) 0%, var(--bg-deep) 45%, #12100e 100%);
+  caret-color: var(--gold);
+  outline: none;
+}
+
+body.write.mode-command #buf {
+  caret-color: var(--brick);
+  caret-shape: block;
+}
+
+#cat-hint {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 3.1rem;
+  padding: 0.35rem 8vmin;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: var(--text-faint);
+  background: linear-gradient(to top, rgba(14, 12, 10, 0.92), transparent);
+  pointer-events: none;
+}
+
+#cat-hint[hidden] {
+  display: none !important;
+}
+
+#cmdline-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0.55rem 8vmin 0.75rem;
+  font-family: var(--serif-en), var(--serif-zh);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--text-dust);
+  background: linear-gradient(to top, rgba(12, 10, 9, 0.97), rgba(18, 16, 14, 0.88));
+  border-top: 1px solid rgba(92, 106, 120, 0.25);
+  min-height: 2.5rem;
+}
+
+#cmdline-wrap[hidden] {
+  display: none !important;
+}
+
+#cmdline {
+  color: var(--gold-dim);
+}
+
+#cmdline .cmd-prefix {
+  color: var(--slate);
+  margin-right: 0.25em;
+}
