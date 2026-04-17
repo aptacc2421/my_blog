@@ -1,21 +1,6 @@
 /* 视觉地基：老城夕阳 + 落灰 — 霞鹜文楷 / EB Garamond，暗金 · 灰蓝 · 红砖 · 落灰 */
 @import url("https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap");
-
-@font-face {
-  font-family: "LXGW WenKai";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/files/lxgwwenkai-regular-subset.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "LXGW WenKai";
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/files/lxgwwenkai-medium-subset.woff2") format("woff2");
-}
+@import url("https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.7.0/style.css");
 
 :root {
   --bg-void: #0e0c0a;
@@ -31,7 +16,7 @@
   --slate-deep: #3d4852;
   --brick: #8f4a42;
   --brick-shadow: #5c2f2a;
-  --serif-zh: "LXGW WenKai", "PingFang SC", "Hiragino Sans GB", serif;
+  --serif-zh: "LXGW WenKai Screen", "LXGW WenKai", "PingFang SC", "Hiragino Sans GB", serif;
   --serif-en: "EB Garamond", "LXGW WenKai", Georgia, serif;
   --mono-atmos: "Consolas", "DejaVu Sans Mono", ui-monospace, monospace;
   --write-size: 0.95rem;
