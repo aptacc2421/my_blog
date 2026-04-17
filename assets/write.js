@@ -340,12 +340,13 @@
     renderCmdline();
   }
 
-  function flashHint(msg) {
+  function flashHint(msg, holdMs) {
+    var ms = holdMs == null ? 4200 : holdMs;
     catHint.hidden = false;
     catHint.textContent = msg;
     window.setTimeout(function () {
       if (mode === "insert") catHint.hidden = true;
-    }, 4200);
+    }, ms);
   }
 
   function archiveScene(category) {
@@ -361,9 +362,18 @@
     Promise.all([
       persistToDisk(rel, text),
       persistToDisk("scenes/index.json", JSON.stringify(idx, null, 2)),
-    ]).catch(function () {
-      flashHint("项目目录写入失败（权限或 :bind 路径）；内容已在 localStorage。");
-    });
+    ])
+      .then(function () {
+        return idbGetRoot();
+      })
+      .then(function (root) {
+        if (root) flashHint("已写入 :bind 绑定的本地目录。", 3200);
+      })
+      .catch(function (e) {
+        var m = e && (e.message || e.name) ? String(e.message || e.name) : String(e);
+        flashHint("写入本地目录失败：" + m.slice(0, 140) + "。内容已在 localStorage。", 10000);
+        console.error(e);
+      });
     buf.value = "";
     saveDraft();
     hideCmdUi();
@@ -435,9 +445,18 @@
     Promise.all([
       persistToDisk(rel, text),
       persistToDisk("tech/index.json", JSON.stringify(list, null, 2)),
-    ]).catch(function () {
-      flashHint("项目目录写入失败；内容已在 localStorage。");
-    });
+    ])
+      .then(function () {
+        return idbGetRoot();
+      })
+      .then(function (root) {
+        if (root) flashHint("已写入 :bind 绑定的本地目录。", 3200);
+      })
+      .catch(function (e) {
+        var m = e && (e.message || e.name) ? String(e.message || e.name) : String(e);
+        flashHint("写入本地目录失败：" + m.slice(0, 140) + "。内容已在 localStorage。", 10000);
+        console.error(e);
+      });
     buf.value = "";
     saveDraft();
     hideCmdUi();
@@ -449,23 +468,40 @@
     hideCmdUi();
     if (typeof window.showDirectoryPicker !== "function") {
       flashHint(
-        "当前浏览器不能选本地文件夹（请用 Chrome / Edge）。换浏览器后可用 :bind：在弹窗里选中你的项目根目录（含 assets、scenes 的那一层，例如 a_opus_plan_version）。"
+        "当前浏览器不能选本地文件夹（请用 Chrome / Edge）。换浏览器后可用 :bind：在弹窗里选中你的项目根目录（含 assets、scenes 的那一层，例如 a_opus_plan_version）。",
+        9000
       );
       setMode("insert");
       buf.focus();
       return;
     }
+    if (!sessionStorage.getItem("bind_folder_tip_v1")) {
+      sessionStorage.setItem("bind_folder_tip_v1", "1");
+      window.alert(
+        "在下一步「选择文件夹」窗口里：\n\n" +
+          "• 项目在 WSL：不要点左侧「网络」。在窗口顶部地址栏粘贴：\n" +
+          "  \\\\wsl$\\Ubuntu\\home\\你的用户名\\my_websets\\a_opus_plan_version\n" +
+          "  （发行版可能是 Ubuntu-22.04 等，在资源管理器里看一下）\n" +
+          "  粘贴后按回车，再点右下角「选择文件夹」。\n\n" +
+          "• 项目在 Windows 盘：从左侧「此电脑」进 C: 或 D: 找到 a_opus_plan_version 即可。"
+      );
+    }
     window
       .showDirectoryPicker({ mode: "readwrite" })
       .then(function (dir) {
-        return idbPutRoot(dir).then(function () {
-          flashHint(
-            "已绑定为当前选中的项目根目录。此后 :wq / :t 会写入该目录下的 scenes/、tech/ 与 index.json（与你在资源管理器里打开的是同一棵树）。"
-          );
-        });
+        return idbPutRoot(dir);
       })
-      .catch(function () {
-        flashHint("未绑定（已取消）。仍可只用 localStorage；要写入本机项目请再执行 :bind 并选中 a_opus_plan_version 根目录。");
+      .then(function () {
+        flashHint("已绑定本地目录。:wq / :t 会写入其中的 scenes/、tech/ 与 index.json。", 8000);
+      })
+      .catch(function (e) {
+        if (e && e.name === "AbortError") {
+          flashHint("已取消选择文件夹。", 6000);
+        } else {
+          var m = e && (e.message || e.name) ? String(e.message || e.name) : String(e);
+          flashHint("绑定失败：" + m.slice(0, 160), 12000);
+          console.error(e);
+        }
       })
       .finally(function () {
         setMode("insert");
