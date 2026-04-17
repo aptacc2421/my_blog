@@ -4,8 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>写作</title>
+  <link rel="stylesheet" href="assets/style.css">
 </head>
-<body>
-  <!-- 步骤 3 将接入全屏写作与 write.js -->
+<body class="write mode-insert">
+  <textarea id="buf" spellcheck="false" aria-label="正文"></textarea>
+  <div id="cat-hint" hidden></div>
+  <div id="cmdline-wrap" hidden><span id="cmdline"></span></div>
+  <script src="assets/write.js"></script>
 </body>
 </html>
