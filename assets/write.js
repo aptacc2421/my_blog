@@ -109,6 +109,51 @@
     return new Date().toISOString().slice(0, 19).replace(/:/g, "-") + ".md";
   }
 
+  /** 第一行非空为标题；去掉行首 markdown ATX 标题的 #（含 ## 等） */
+  function firstLineAsTitle(text) {
+    var lines = String(text).split(/\r?\n/);
+    for (var i = 0; i < lines.length; i++) {
+      var s = lines[i].trim();
+      if (!s) continue;
+      return s.replace(/^#{1,6}\s+/, "").trim();
+    }
+    return "";
+  }
+
+  function safeSceneBasenameFromTitle(title) {
+    if (!title) return null;
+    var stem = title
+      .replace(/[/\\:*?"<>|\r\n\t\x00-\x1f]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    stem = stem.replace(/^\.+|\.+$/g, "").trim();
+    if (!stem) return null;
+    if (stem.toLowerCase().endsWith(".md")) stem = stem.slice(0, -4).trim();
+    if (!stem) return null;
+    if (stem.length > 100) stem = stem.slice(0, 100).trim();
+    return stem + ".md";
+  }
+
+  function uniqueSceneFilename(idx, category, basename) {
+    var list = idx[category] || [];
+    if (list.indexOf(basename) === -1) return basename;
+    var stem = basename.replace(/\.md$/i, "");
+    var n = 2;
+    var candidate;
+    do {
+      candidate = stem + "_" + n + ".md";
+      n++;
+    } while (list.indexOf(candidate) !== -1);
+    return candidate;
+  }
+
+  function sceneFilenameFromDraft(text, idx, category) {
+    var t = firstLineAsTitle(text);
+    var base = safeSceneBasenameFromTitle(t);
+    if (!base) return isoSceneFilename();
+    return uniqueSceneFilename(idx, category, base);
+  }
+
   function techFilename(title) {
     var d = new Date().toISOString().slice(0, 10);
     var slug = title
@@ -217,9 +262,9 @@
 
   function archiveScene(category) {
     var text = buf.value;
-    var fname = isoSceneFilename();
-    var rel = "scenes/" + category + "/" + fname;
     var idx = ensureScenesIndex();
+    var fname = sceneFilenameFromDraft(text, idx, category);
+    var rel = "scenes/" + category + "/" + fname;
     if (!idx[category]) idx[category] = [];
     if (idx[category].indexOf(fname) === -1) idx[category].push(fname);
     setScenesIndex(idx);
