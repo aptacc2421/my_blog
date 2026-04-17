@@ -8,6 +8,10 @@
   var BLOB_PREFIX = "scene_blob_";
   var TECH_BLOB_PREFIX = "tech_blob_";
 
+  var FS_DB = "minimal-write-fs";
+  var FS_STORE = "handles";
+  var FS_KEY_ROOT = "projectRoot";
+
   var DEFAULT_SCENES = {
     雨落狂流之暗: [],
     盛夏大逃亡: [],
@@ -154,6 +158,90 @@
     return uniqueSceneFilename(idx, category, base);
   }
 
+  function openFsDb() {
+    return new Promise(function (resolve, reject) {
+      var r = indexedDB.open(FS_DB, 1);
+      r.onupgradeneeded = function (ev) {
+        var db = ev.target.result;
+        if (!db.objectStoreNames.contains(FS_STORE)) db.createObjectStore(FS_STORE);
+      };
+      r.onsuccess = function () {
+        resolve(r.result);
+      };
+      r.onerror = function () {
+        reject(r.error);
+      };
+    });
+  }
+
+  function idbGetRoot() {
+    return openFsDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(FS_STORE, "readonly");
+        var req = tx.objectStore(FS_STORE).get(FS_KEY_ROOT);
+        req.onsuccess = function () {
+          resolve(req.result || null);
+        };
+        req.onerror = function () {
+          reject(req.error);
+        };
+      });
+    });
+  }
+
+  function idbPutRoot(handle) {
+    return openFsDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(FS_STORE, "readwrite");
+        tx.objectStore(FS_STORE).put(handle, FS_KEY_ROOT);
+        tx.oncomplete = function () {
+          resolve();
+        };
+        tx.onerror = function () {
+          reject(tx.error);
+        };
+      });
+    });
+  }
+
+  function writePathUnderRoot(root, relPath, text) {
+    var parts = String(relPath).split("/").filter(Boolean);
+    if (!parts.length) return Promise.resolve();
+    var fileName = parts.pop();
+    var chain = Promise.resolve(root);
+    parts.forEach(function (seg) {
+      chain = chain.then(function (dh) {
+        return dh.getDirectoryHandle(seg, { create: true });
+      });
+    });
+    return chain
+      .then(function (dir) {
+        return dir.getFileHandle(fileName, { create: true });
+      })
+      .then(function (fh) {
+        return fh.createWritable();
+      })
+      .then(function (w) {
+        return w.write(text).then(function () {
+          return w.close();
+        });
+      });
+  }
+
+  /** 若曾用 :bind 选择过仓库根目录，则写入本机磁盘（与 Git 仓同路径）；失败不影响 localStorage */
+  function persistToDisk(relPath, text) {
+    return idbGetRoot().then(function (root) {
+      if (!root) return;
+      var perm = root.requestPermission
+        ? root.requestPermission({ mode: "readwrite" })
+        : Promise.resolve("granted");
+      return perm.then(function (st) {
+        if (st !== "granted") return;
+        return writePathUnderRoot(root, relPath, text);
+      });
+    });
+  }
+
   function techFilename(title) {
     var d = new Date().toISOString().slice(0, 10);
     var slug = title
@@ -270,6 +358,12 @@
     setScenesIndex(idx);
     localStorage.setItem(BLOB_PREFIX + rel, text);
     pushPending(rel, text);
+    Promise.all([
+      persistToDisk(rel, text),
+      persistToDisk("scenes/index.json", JSON.stringify(idx, null, 2)),
+    ]).catch(function () {
+      flashHint("本机仓库目录写入失败（可检查 :bind 权限）；内容已在 localStorage。");
+    });
     buf.value = "";
     saveDraft();
     hideCmdUi();
@@ -338,11 +432,43 @@
     setTechIndex(list);
     localStorage.setItem(TECH_BLOB_PREFIX + rel, text);
     pushPending(rel, text);
+    Promise.all([
+      persistToDisk(rel, text),
+      persistToDisk("tech/index.json", JSON.stringify(list, null, 2)),
+    ]).catch(function () {
+      flashHint("本机仓库目录写入失败；内容已在 localStorage。");
+    });
     buf.value = "";
     saveDraft();
     hideCmdUi();
     setMode("insert");
     buf.focus();
+  }
+
+  function runBind() {
+    hideCmdUi();
+    if (typeof window.showDirectoryPicker !== "function") {
+      flashHint(
+        "当前浏览器不支持选择文件夹（需 Chrome / Edge）。归档仍会留在 localStorage，清除站点数据前不会丢。"
+      );
+      setMode("insert");
+      buf.focus();
+      return;
+    }
+    window
+      .showDirectoryPicker({ mode: "readwrite" })
+      .then(function (dir) {
+        return idbPutRoot(dir).then(function () {
+          flashHint("已绑定本机仓库根目录；此后 :wq / :t 会同步写入 scenes/、tech/ 与 index.json。");
+        });
+      })
+      .catch(function () {
+        flashHint("未绑定目录（已取消）。");
+      })
+      .finally(function () {
+        setMode("insert");
+        buf.focus();
+      });
   }
 
   function execCommandLine() {
@@ -367,6 +493,10 @@
     }
     if (line === "token") {
       runToken();
+      return;
+    }
+    if (line === "bind") {
+      runBind();
       return;
     }
     var tMatch = line.match(/^t\s+(.+)$/);
