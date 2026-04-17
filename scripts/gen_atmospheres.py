@@ -91,61 +91,72 @@ def gen_window():
     return ["".join(r)[:W] for r in lines]
 
 
-# --- 盛夏大逃亡：悬崖剪影、半圆日+倒影、树海、远摩天轮 ---
+# --- 盛夏大逃亡：按层叠加，树海不盖住摩天轮与列车 ---
 def gen_summer():
+    sea_y = 21
+    cx, cy, r = 52, 21, 7
     lines = []
     for y in range(H):
         row = [" "] * W
-        # sea line
-        sea_y = 22
-        if y == sea_y:
+
+        if y <= 4:
             for x in range(W):
-                row[x] = "~"
-        # sun touching sea
-        if 18 <= y <= 21:
-            cx = 52
-            for x in range(cx - 6, cx + 7):
+                row[x] = "*" if (x // 6 + y) % 2 == 0 else "~"
+
+        if 5 <= y <= 13:
+            for x in range(W):
+                if (x - cx) ** 2 + (y - cy) ** 2 <= (r + 3) ** 2:
+                    continue
+                if y == 6 and 64 <= x <= 72:
+                    continue
+                if y == 11 and 2 <= x <= 24:
+                    continue
+                wave = (x // 4 + y * 2) % 7
+                row[x] = "^" if wave < 5 else "w"
+
+        if y == 6:
+            for x, ch in [(66, "("), (67, "-"), (68, "-"), (69, "-"), (70, ")")]:
                 if 0 <= x < W:
-                    if (x - cx) ** 2 + (y - 19) ** 2 <= 36:
-                        row[x] = "O"
-        # reflection
-        if 23 <= y <= 26:
-            cx = 52
-            ry = 25 - (y - 23)
-            for x in range(cx - 6, cx + 7):
-                if 0 <= x < W:
-                    if (x - cx) ** 2 + (ry - 19) ** 2 <= 30:
-                        row[x] = "o"
-        # tree sea
-        if 8 <= y < sea_y - 2:
-            for x in range(0, W, 3):
-                row[x] = "^" if (x + y) % 7 else "w"
-        # cliff foreground bottom
-        if y >= 30:
-            for x in range(0, 55):
-                row[x] = "#" if (x + y) % 2 else "="
-        # two silhouettes on cliff edge
-        if 26 <= y <= 30:
-            for x in range(34, 38):
-                row[x] = "#"
-            for x in range(40, 44):
-                row[x] = "#"
-        # big bear blob
-        if 27 <= y <= 29:
-            for x in range(42, 48):
-                row[x] = "#"
-        # distant ferris wheel
-        if 10 <= y <= 16:
-            cx = 72
-            if abs(y - 13) + abs(72 - cx) < 1:
-                pass
-        for yy, xx, ch in [(12, 70, "("), (12, 76, ")"), (13, 73, "|")]:
-            if y == yy and 0 <= xx < W:
-                row[xx] = ch
-        # train hint far
-        if y == 16:
-            for x in range(8, 20):
+                    row[x] = ch
+        if y == 7 and 68 < W:
+            row[68] = "|"
+
+        if y == 11:
+            for x in range(2, 23):
                 row[x] = "="
+            if 23 < W:
+                row[23] = ">"
+
+        if y == sea_y:
+            row = ["~"] * W
+
+        if y < sea_y:
+            for x in range(W):
+                if (x - cx) ** 2 + (y - cy) ** 2 <= r * r:
+                    row[x] = "O"
+
+        if 22 <= y <= 25:
+            for x in range(W):
+                if (x - cx) ** 2 // 2 + (y - 23) ** 2 <= 28:
+                    row[x] = "o"
+
+        if y >= 26:
+            edge = 52 - (y - 26) * 2
+            edge = max(8, min(edge, W))
+            for x in range(edge):
+                row[x] = "#" if (x + y) % 2 else "="
+
+        if y in (23, 24):
+            for x in range(30, 33):
+                if x < W:
+                    row[x] = "#"
+            for x in range(35, 38):
+                if x < W:
+                    row[x] = "#"
+            for x in range(39, 47):
+                if x < W:
+                    row[x] = "#"
+
         lines.append("".join(row)[:W])
     return lines
 
