@@ -367,7 +367,7 @@
         ev.preventDefault();
         ev.stopPropagation();
         hideCmdUi();
-        setMode("command");
+        setMode("normal");
         buf.focus();
       }
       return;
