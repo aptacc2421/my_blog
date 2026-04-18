@@ -103,9 +103,13 @@
   }
 
   function pickCategory(idx) {
-    var keys = Object.keys(idx);
-    if (!keys.length) return "无名之地";
-    return keys[Math.floor(Math.random() * keys.length)];
+    var all = Object.keys(idx);
+    var withFiles = all.filter(function (k) {
+      return Array.isArray(idx[k]) && idx[k].length > 0;
+    });
+    var pool = withFiles.length ? withFiles : all;
+    if (!pool.length) return "无名之地";
+    return pool[Math.floor(Math.random() * pool.length)];
   }
 
   function sceneUrl(cat, file) {
@@ -174,7 +178,10 @@
               placeFragment(div);
             });
           })
-        );
+        ).then(function () {
+          var empty = document.getElementById("shard-empty");
+          if (empty) empty.hidden = shards.children.length > 0;
+        });
       });
     }).catch(function () {
       atmos.textContent = " ";

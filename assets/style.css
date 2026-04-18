@@ -98,7 +98,7 @@ body.life {
   font-size: clamp(7px, 1.1vmin, 11px);
   line-height: 1.05;
   color: var(--slate);
-  opacity: 0.28;
+  opacity: 0.38;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -154,10 +154,26 @@ body.life .dust-footnote {
   z-index: 1;
   font-size: calc(var(--write-size) * 0.6);
   letter-spacing: 0.12em;
-  color: var(--slate-deep);
-  opacity: 0.35;
+  color: var(--text-dust);
+  opacity: 0.5;
   pointer-events: none;
   white-space: nowrap;
+}
+
+body.life .shard-empty {
+  position: fixed;
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  max-width: 22rem;
+  padding: 0 1rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-dust);
+  opacity: 0.75;
+  text-align: center;
+  pointer-events: none;
 }
 
 @media (max-width: 36rem) {
