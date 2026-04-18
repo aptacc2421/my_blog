@@ -9,24 +9,26 @@
     body {
       margin: 0;
       min-height: 100%;
-      background: #f0ece6;
-      color: #1c1a18;
+      background: radial-gradient(120% 80% at 50% 0%, #7a2228 0%, #4f1418 42%, #2d0a0e 100%);
+      background-color: #3a1014;
+      color: #f9ebe3;
       font-family: ui-monospace, "Cascadia Code", Consolas, "DejaVu Sans Mono", monospace;
       font-size: 15px;
       line-height: 1.55;
     }
     a {
-      color: #1a4d8f;
+      color: #f0c86c;
       text-decoration: none;
     }
     a:hover {
       text-decoration: underline;
+      color: #ffe4a8;
     }
     .nav-back {
       display: inline-block;
       margin: 1rem 0 0 1.25rem;
       font-size: 0.82rem;
-      color: #5c5854;
+      color: #c4a89e;
     }
     #list {
       max-width: 40rem;
@@ -51,7 +53,7 @@
       max-width: 46rem;
       margin: 0 auto 3rem;
       padding: 0 1.25rem;
-      border-top: 1px solid #d4cec4;
+      border-top: 1px solid rgba(255, 200, 180, 0.22);
       padding-top: 1.5rem;
     }
     #article:empty {
@@ -62,18 +64,26 @@
     #article h3 {
       font-family: inherit;
       font-weight: 600;
+      color: #fff5ed;
+    }
+    #article a {
+      color: #f0c86c;
+    }
+    #article a:hover {
+      color: #ffe4a8;
     }
     #article pre,
     #article code {
       font-family: inherit;
-      background: #e6e1d8;
+      background: rgba(0, 0, 0, 0.28);
+      color: #f5e6dc;
     }
     #article pre {
       padding: 0.75rem 1rem;
       overflow: auto;
     }
     .muted {
-      color: #6a6560;
+      color: #b89e96;
       font-size: 0.9rem;
     }
   </style>
