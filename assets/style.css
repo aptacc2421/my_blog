@@ -1,6 +1,4 @@
-/* 视觉地基：老城夕阳 + 落灰 — 霞鹜文楷 / EB Garamond，暗金 · 灰蓝 · 红砖 · 落灰 */
-@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap");
-@import url("https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.7.0/style.css");
+/* 视觉地基：老城夕阳 + 落灰 — 中英字体在 assets/fonts.css（由 HTML 单独引入，避免 @import 阻塞首屏） */
 
 :root {
   --bg-void: #0e0c0a;

@@ -7,6 +7,17 @@
   var atmos = document.getElementById("atmos");
   var shards = document.getElementById("shards");
 
+  function fetchTimed(url, ms) {
+    ms = ms || 8000;
+    var ctrl = new AbortController();
+    var t = setTimeout(function () {
+      ctrl.abort();
+    }, ms);
+    return fetch(url, { signal: ctrl.signal }).finally(function () {
+      clearTimeout(t);
+    });
+  }
+
   function esc(s) {
     return String(s)
       .replace(/&/g, "&amp;")
@@ -72,7 +83,7 @@
   }
 
   function loadIndex() {
-    return fetch("scenes/index.json")
+    return fetchTimed("scenes/index.json", 8000)
       .then(function (r) {
         if (!r.ok) return {};
         return r.json();
@@ -109,7 +120,7 @@
   function loadSceneText(cat, file) {
     var rel = "scenes/" + cat + "/" + file;
     var url = sceneUrl(cat, file);
-    return fetch(url)
+    return fetchTimed(url, 8000)
       .then(function (r) {
         if (r.ok) return r.text();
         return null;
@@ -125,7 +136,7 @@
 
   function loadAtmosphere(cat) {
     var url = "atmospheres/" + encodeURIComponent(cat) + ".txt";
-    return fetch(url)
+    return fetchTimed(url, 8000)
       .then(function (r) {
         if (r.ok) return r.text();
         return "";
@@ -165,6 +176,8 @@
           })
         );
       });
+    }).catch(function () {
+      atmos.textContent = " ";
     });
   }
 
