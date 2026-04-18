@@ -7,6 +7,8 @@
   var LS_TECH = "tech_index";
   var BLOB_PREFIX = "scene_blob_";
   var TECH_BLOB_PREFIX = "tech_blob_";
+  var LS_GH_REPO = "gh_repo";
+  var LS_GH_BRANCH = "gh_branch";
 
   var FS_DB = "minimal-write-fs";
   var FS_STORE = "handles";
@@ -55,7 +57,8 @@
     var out = {};
     var k;
     for (k in base) {
-      if (Object.prototype.hasOwnProperty.call(base, k)) out[k] = base[k].slice();
+      if (Object.prototype.hasOwnProperty.call(base, k))
+        out[k] = base[k].slice();
     }
     for (k in extra) {
       if (!Object.prototype.hasOwnProperty.call(extra, k)) continue;
@@ -163,7 +166,8 @@
       var r = indexedDB.open(FS_DB, 1);
       r.onupgradeneeded = function (ev) {
         var db = ev.target.result;
-        if (!db.objectStoreNames.contains(FS_STORE)) db.createObjectStore(FS_STORE);
+        if (!db.objectStoreNames.contains(FS_STORE))
+          db.createObjectStore(FS_STORE);
       };
       r.onsuccess = function () {
         resolve(r.result);
@@ -349,6 +353,143 @@
     }, ms);
   }
 
+  function getGhAuth() {
+    var token = (localStorage.getItem("gh_pat") || "").trim();
+    var repo = (localStorage.getItem(LS_GH_REPO) || "").trim();
+    var i = repo.indexOf("/");
+    if (!token || i < 1) return null;
+    return {
+      token: token,
+      owner: repo.slice(0, i),
+      repo: repo.slice(i + 1),
+      branch: (localStorage.getItem(LS_GH_BRANCH) || "main").trim() || "main",
+    };
+  }
+
+  function encGhPath(relPath) {
+    return String(relPath)
+      .split("/")
+      .map(function (s) {
+        return encodeURIComponent(s);
+      })
+      .join("/");
+  }
+
+  function utf8ToBase64(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+  }
+
+  function ghGetContentMeta(encPath) {
+    var a = getGhAuth();
+    if (!a) return Promise.resolve(null);
+    var url =
+      "https://api.github.com/repos/" +
+      encodeURIComponent(a.owner) +
+      "/" +
+      encodeURIComponent(a.repo) +
+      "/contents/" +
+      encPath +
+      "?ref=" +
+      encodeURIComponent(a.branch);
+    return fetch(url, {
+      headers: {
+        Authorization: "Bearer " + a.token,
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    }).then(function (r) {
+      if (r.status === 404) return null;
+      return r.json().then(function (j) {
+        if (!r.ok) throw new Error((j && j.message) || String(r.status));
+        return j;
+      });
+    });
+  }
+
+  function ghPutFile(relPath, content, message) {
+    var a = getGhAuth();
+    if (!a) return Promise.reject(new Error("未配置 PAT 或仓库"));
+    var enc = encGhPath(relPath);
+    return ghGetContentMeta(enc).then(function (meta) {
+      var url =
+        "https://api.github.com/repos/" +
+        encodeURIComponent(a.owner) +
+        "/" +
+        encodeURIComponent(a.repo) +
+        "/contents/" +
+        enc;
+      var body = {
+        message: message,
+        content: utf8ToBase64(content),
+        branch: a.branch,
+      };
+      if (meta && meta.sha) body.sha = meta.sha;
+      return fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: "Bearer " + a.token,
+          Accept: "application/vnd.github+json",
+          "Content-Type": "application/json",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+        body: JSON.stringify(body),
+      }).then(function (r) {
+        return r.json().then(function (j) {
+          if (!r.ok) throw new Error((j && j.message) || String(r.status));
+          return j;
+        });
+      });
+    });
+  }
+
+  function tryGithubSceneOrQueue(rel, text, idx) {
+    if (!getGhAuth()) {
+      pushPending(rel, text);
+      return Promise.resolve(null);
+    }
+    return ghPutFile(rel, text, "write: " + rel)
+      .then(function () {
+        return ghPutFile(
+          "scenes/index.json",
+          JSON.stringify(idx, null, 2),
+          "sync scenes/index.json",
+        );
+      })
+      .then(function () {
+        return "已推送到 GitHub。";
+      })
+      .catch(function (e) {
+        pushPending(rel, text);
+        return (
+          "GitHub 失败，已入队：" + String(e.message || e).slice(0, 72)
+        );
+      });
+  }
+
+  function tryGithubTechOrQueue(rel, text, list) {
+    if (!getGhAuth()) {
+      pushPending(rel, text);
+      return Promise.resolve(null);
+    }
+    return ghPutFile(rel, text, "write: " + rel)
+      .then(function () {
+        return ghPutFile(
+          "tech/index.json",
+          JSON.stringify(list, null, 2),
+          "sync tech/index.json",
+        );
+      })
+      .then(function () {
+        return "已推送到 GitHub。";
+      })
+      .catch(function (e) {
+        pushPending(rel, text);
+        return (
+          "GitHub 失败，已入队：" + String(e.message || e).slice(0, 72)
+        );
+      });
+  }
+
   function archiveScene(category) {
     var text = buf.value;
     var idx = ensureScenesIndex();
@@ -358,7 +499,10 @@
     if (idx[category].indexOf(fname) === -1) idx[category].push(fname);
     setScenesIndex(idx);
     localStorage.setItem(BLOB_PREFIX + rel, text);
-    pushPending(rel, text);
+    tryGithubSceneOrQueue(rel, text, idx).then(function (hint) {
+      if (hint)
+        flashHint(hint, hint.indexOf("失败") >= 0 ? 10000 : 4500);
+    });
     Promise.all([
       persistToDisk(rel, text),
       persistToDisk("scenes/index.json", JSON.stringify(idx, null, 2)),
@@ -370,8 +514,12 @@
         if (root) flashHint("已写入 :bind 绑定的本地目录。", 3200);
       })
       .catch(function (e) {
-        var m = e && (e.message || e.name) ? String(e.message || e.name) : String(e);
-        flashHint("写入本地目录失败：" + m.slice(0, 140) + "。内容已在 localStorage。", 10000);
+        var m =
+          e && (e.message || e.name) ? String(e.message || e.name) : String(e);
+        flashHint(
+          "写入本地目录失败：" + m.slice(0, 140) + "。内容已在 localStorage。",
+          10000,
+        );
         console.error(e);
       });
     buf.value = "";
@@ -403,22 +551,103 @@
   }
 
   function runPush() {
+    var a = getGhAuth();
+    if (!a) {
+      flashHint("请先 :token 保存 PAT，并填写 owner/repo（第二个弹窗）或 :repo。", 9000);
+      hideCmdUi();
+      setMode("insert");
+      buf.focus();
+      return;
+    }
     var q = getArchivedPending();
     if (!q.length) {
       flashHint("暂无待同步条目。");
-    } else {
-      flashHint("离线已就绪 " + q.length + " 条；配置 PAT 后 :push 将同步到 GitHub。");
+      hideCmdUi();
+      setMode("insert");
+      buf.focus();
+      return;
     }
+    var chain = Promise.resolve();
+    q.forEach(function (item) {
+      chain = chain.then(function () {
+        return ghPutFile(
+          item.path,
+          item.content,
+          "push: " + item.path,
+        );
+      });
+    });
+    chain
+      .then(function () {
+        return ghPutFile(
+          "scenes/index.json",
+          localStorage.getItem(LS_SCENES) || "{}",
+          "sync scenes/index.json",
+        );
+      })
+      .then(function () {
+        return ghPutFile(
+          "tech/index.json",
+          localStorage.getItem(LS_TECH) || "[]",
+          "sync tech/index.json",
+        );
+      })
+      .then(function () {
+        setArchivedPending([]);
+        flashHint("GitHub 同步完成（" + q.length + " 个文件 + index）。");
+      })
+      .catch(function (e) {
+        flashHint(
+          "同步失败：" + String(e.message || e).slice(0, 140),
+          12000,
+        );
+        console.error(e);
+      })
+      .finally(function () {
+        hideCmdUi();
+        setMode("insert");
+        buf.focus();
+      });
+  }
+
+  function runToken() {
+    var t = window.prompt(
+      "GitHub PAT（仅保存在本机 localStorage，不会进仓库）：",
+      localStorage.getItem("gh_pat") || "",
+    );
+    if (t != null && t !== "") localStorage.setItem("gh_pat", t.trim());
+    var rep = window.prompt(
+      "仓库 owner/repo（例如 yourname/a_opus_plan_version）：",
+      localStorage.getItem(LS_GH_REPO) || "",
+    );
+    if (rep != null && rep.trim().indexOf("/") > 0)
+      localStorage.setItem(LS_GH_REPO, rep.trim());
+    var saved = [];
+    if (t != null && t !== "") saved.push("PAT");
+    if (rep != null && rep.trim().indexOf("/") > 0) saved.push("仓库");
+    var hint =
+      saved.length > 0
+        ? "已保存 " + saved.join("、") + "。"
+        : "未输入有效内容。";
+    if (
+      t != null &&
+      t !== "" &&
+      (!rep || rep.trim().indexOf("/") <= 0)
+    )
+      hint += " 可用 :repo owner/repo 指定仓库。";
+    flashHint(hint, 7000);
     hideCmdUi();
     setMode("insert");
     buf.focus();
   }
 
-  function runToken() {
-    var t = window.prompt("GitHub PAT（仅保存在本机 localStorage，不会进仓库）：");
-    if (t != null && t !== "") {
-      localStorage.setItem("gh_pat", t.trim());
-      flashHint("PAT 已保存。");
+  function runRepo(arg) {
+    var s = (arg || "").trim();
+    if (s.indexOf("/") > 0) {
+      localStorage.setItem(LS_GH_REPO, s);
+      flashHint("已保存仓库 " + s, 5000);
+    } else {
+      flashHint(":repo 格式为 owner/repo", 5000);
     }
     hideCmdUi();
     setMode("insert");
@@ -441,7 +670,10 @@
     list.push({ file: file, title: name });
     setTechIndex(list);
     localStorage.setItem(TECH_BLOB_PREFIX + rel, text);
-    pushPending(rel, text);
+    tryGithubTechOrQueue(rel, text, list).then(function (hint) {
+      if (hint)
+        flashHint(hint, hint.indexOf("失败") >= 0 ? 10000 : 4500);
+    });
     Promise.all([
       persistToDisk(rel, text),
       persistToDisk("tech/index.json", JSON.stringify(list, null, 2)),
@@ -453,8 +685,12 @@
         if (root) flashHint("已写入 :bind 绑定的本地目录。", 3200);
       })
       .catch(function (e) {
-        var m = e && (e.message || e.name) ? String(e.message || e.name) : String(e);
-        flashHint("写入本地目录失败：" + m.slice(0, 140) + "。内容已在 localStorage。", 10000);
+        var m =
+          e && (e.message || e.name) ? String(e.message || e.name) : String(e);
+        flashHint(
+          "写入本地目录失败：" + m.slice(0, 140) + "。内容已在 localStorage。",
+          10000,
+        );
         console.error(e);
       });
     buf.value = "";
@@ -469,7 +705,7 @@
     if (typeof window.showDirectoryPicker !== "function") {
       flashHint(
         "当前浏览器不能选本地文件夹（请用 Chrome / Edge）。换浏览器后可用 :bind：在弹窗里选中你的项目根目录（含 assets、scenes 的那一层，例如 a_opus_plan_version）。",
-        9000
+        9000,
       );
       setMode("insert");
       buf.focus();
@@ -483,7 +719,7 @@
           "  \\\\wsl$\\Ubuntu\\home\\你的用户名\\my_websets\\a_opus_plan_version\n" +
           "  （发行版可能是 Ubuntu-22.04 等，在资源管理器里看一下）\n" +
           "  粘贴后按回车，再点右下角「选择文件夹」。\n\n" +
-          "• 项目在 Windows 盘：从左侧「此电脑」进 C: 或 D: 找到 a_opus_plan_version 即可。"
+          "• 项目在 Windows 盘：从左侧「此电脑」进 C: 或 D: 找到 a_opus_plan_version 即可。",
       );
     }
     window
@@ -492,13 +728,19 @@
         return idbPutRoot(dir);
       })
       .then(function () {
-        flashHint("已绑定本地目录。:wq / :t 会写入其中的 scenes/、tech/ 与 index.json。", 8000);
+        flashHint(
+          "已绑定本地目录。:wq / :t 会写入其中的 scenes/、tech/ 与 index.json。",
+          8000,
+        );
       })
       .catch(function (e) {
         if (e && e.name === "AbortError") {
           flashHint("已取消选择文件夹。", 6000);
         } else {
-          var m = e && (e.message || e.name) ? String(e.message || e.name) : String(e);
+          var m =
+            e && (e.message || e.name)
+              ? String(e.message || e.name)
+              : String(e);
           flashHint("绑定失败：" + m.slice(0, 160), 12000);
           console.error(e);
         }
@@ -531,6 +773,11 @@
     }
     if (line === "token") {
       runToken();
+      return;
+    }
+    var rm = line.match(/^repo\s*(.*)$/);
+    if (rm) {
+      runRepo(rm[1] || "");
       return;
     }
     if (line === "bind") {
@@ -570,7 +817,9 @@
     }
     archiveScene(category);
     if (isNew) {
-      flashHint("记得给它配一张字符画背景（atmospheres/" + category + ".txt）。");
+      flashHint(
+        "记得给它配一张字符画背景（atmospheres/" + category + ".txt）。",
+      );
     }
   }
 
