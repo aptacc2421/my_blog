@@ -138,6 +138,21 @@
     return pool[Math.floor(Math.random() * pool.length)];
   }
 
+  /** 若地址栏带 ?cat= 或 ?world=（栏目名须与 scenes/index.json 的 key 完全一致），则固定进入该场景，不随机 */
+  function categoryFromUrl(idx) {
+    try {
+      var p = new URLSearchParams(location.search);
+      var raw = p.get("cat") || p.get("world") || "";
+      if (!raw) return null;
+      var name = String(raw).trim();
+      if (!name) return null;
+      if (Object.prototype.hasOwnProperty.call(idx, name)) return name;
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   function sceneUrl(cat, file) {
     return (
       "scenes/" +
@@ -187,7 +202,13 @@
 
   function run() {
     loadIndex().then(function (idx) {
-      var cat = pickCategory(idx);
+      var forced = categoryFromUrl(idx);
+      var cat = forced != null ? forced : pickCategory(idx);
+      if (forced != null) {
+        try {
+          document.title = cat + " — 生活";
+        } catch (_) {}
+      }
       var files = (idx[cat] && idx[cat].slice()) || [];
       var n = Math.min(files.length, randInt(3, 6));
       if (files.length && n < 3) n = files.length;
