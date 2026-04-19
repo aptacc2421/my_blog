@@ -336,16 +336,18 @@ body.life-read .scene-read-err {
   opacity: 0.85;
 }
 
+/* 脚注彩蛋：具体位置与透明度由 dust-easter.js 随机；无 JS 时仍略可见 */
+body.life .dust-footnote,
 body.life-read .dust-footnote {
   position: fixed;
-  bottom: 1rem;
+  z-index: 1;
+  bottom: 0.75rem;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1;
-  font-size: calc(var(--write-size) * 0.6);
-  letter-spacing: 0.12em;
+  font-size: calc(var(--write-size) * 0.48);
+  letter-spacing: 0.1em;
   color: var(--text-dust);
-  opacity: 0.5;
+  opacity: 0.18;
   pointer-events: none;
   white-space: nowrap;
 }
@@ -367,20 +369,6 @@ body.life .back-gate:hover {
   color: var(--gold-dim);
 }
 
-body.life .dust-footnote {
-  position: fixed;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1;
-  font-size: calc(var(--write-size) * 0.6);
-  letter-spacing: 0.12em;
-  color: var(--text-dust);
-  opacity: 0.5;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
 body.life .shard-empty {
   position: fixed;
   top: 42%;
@@ -395,16 +383,6 @@ body.life .shard-empty {
   opacity: 0.75;
   text-align: center;
   pointer-events: none;
-}
-
-@media (max-width: 36rem) {
-  body.life .dust-footnote {
-    left: 1rem;
-    right: 1rem;
-    transform: none;
-    text-align: center;
-    white-space: normal;
-  }
 }
 
 /* —— 写作页 —— */

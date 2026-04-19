@@ -138,6 +138,7 @@ python3 -m http.server 8000
 | `PLAN.md` | 原始设计与数据格式约定 |
 | `PROMPTS.md` | 字符画生成用 prompt 参考 |
 | `assets/md-unfussy.js` | 解析前轻量规范化 Markdown（如 `###标题` → 供 marked 识别） |
+| `assets/dust-easter.js` | 生活/片段页底注「这里有一个人住过」：随机贴底位置 + 极低透明度（彩蛋） |
 | `scripts/wsl-proxy-env.sh` | 被 `wsl-git.sh` / `wsl-curl.sh` 引用，设置代理环境变量 |
 
 更细的格式约定见 **`PLAN.md`** 第三章；写作命令实现细节以 **`assets/write.js`** 为准。
