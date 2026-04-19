@@ -204,16 +204,53 @@
       });
   }
 
-  function loadAtmosphere(cat) {
-    var url = "atmospheres/" + encodeURIComponent(cat) + ".txt";
+  function clearAtmosRaster() {
+    atmos.classList.remove("atmos-raster");
+    atmos.style.backgroundImage = "";
+    atmos.style.backgroundSize = "";
+    atmos.style.backgroundPosition = "";
+  }
+
+  function applyAtmosResult(res) {
+    clearAtmosRaster();
+    if (res.mode === "image") {
+      atmos.classList.add("atmos-raster");
+      atmos.textContent = "";
+      atmos.style.backgroundImage = 'url("' + res.url + '")';
+      return;
+    }
+    atmos.textContent = res.text != null && res.text !== "" ? res.text : " ";
+  }
+
+  function tryRasterExt(cat, exts, idx) {
+    if (idx >= exts.length) return Promise.resolve(null);
+    var url = "atmospheres/" + encodeURIComponent(cat) + exts[idx];
     return fetchTimed(url, 8000)
       .then(function (r) {
-        if (r.ok) return r.text();
-        return "";
+        if (r.ok) return url;
+        return tryRasterExt(cat, exts, idx + 1);
       })
       .catch(function () {
-        return "";
+        return tryRasterExt(cat, exts, idx + 1);
       });
+  }
+
+  /** 优先同栏目名的 .png/.jpg/.webp，否则回退 atmospheres/<栏目>.txt 字符画 */
+  function loadAtmosphere(cat) {
+    return tryRasterExt(cat, [".png", ".jpg", ".jpeg", ".webp"], 0).then(function (imgUrl) {
+      if (imgUrl) return { mode: "image", url: imgUrl };
+      return fetchTimed("atmospheres/" + encodeURIComponent(cat) + ".txt", 8000)
+        .then(function (r) {
+          if (r.ok) return r.text();
+          return "";
+        })
+        .catch(function () {
+          return "";
+        })
+        .then(function (txt) {
+          return { mode: "ascii", text: txt || " " };
+        });
+    });
   }
 
   function placeFragment(el) {
@@ -231,7 +268,7 @@
       var req = urlCatRequest(idx);
 
       if (req.kind === "bad") {
-        atmos.textContent = " ";
+        applyAtmosResult({ mode: "ascii", text: " " });
         if (emptyEl) {
           emptyEl.hidden = false;
           emptyEl.textContent =
@@ -256,8 +293,8 @@
       var files = (idx[cat] && idx[cat].slice()) || [];
 
       if (forced && files.length === 0) {
-        return loadAtmosphere(cat).then(function (txt) {
-          atmos.textContent = txt || " ";
+        return loadAtmosphere(cat).then(function (res) {
+          applyAtmosResult(res);
           if (emptyEl) {
             emptyEl.hidden = false;
             emptyEl.textContent =
@@ -271,8 +308,8 @@
       var n = Math.min(files.length, randInt(3, 6));
       if (files.length && n < 3) n = files.length;
 
-      return loadAtmosphere(cat).then(function (txt) {
-        atmos.textContent = txt || " ";
+      return loadAtmosphere(cat).then(function (res) {
+        applyAtmosResult(res);
         var picks = shuffle(files).slice(0, n);
         return Promise.all(
           picks.map(function (f) {
@@ -289,7 +326,7 @@
         });
       });
     }).catch(function () {
-      atmos.textContent = " ";
+      applyAtmosResult({ mode: "ascii", text: " " });
     });
   }
 

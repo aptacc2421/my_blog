@@ -64,7 +64,7 @@
 
 - 在 **`scenes/<栏目>/`** 下增删改 `.md` 文件；同步维护 **`scenes/index.json`**（栏目名 → 文件名数组）。
 - 在 **`tech/`** 下增删改 `.md`；同步维护 **`tech/index.json`**（`[{ "file": "...", "title": "..." }, ...]`）。
-- 生活侧**新栏目**：新建 `scenes/<栏目>/`，在 `scenes/index.json` 增加对应 key；建议补 **`atmospheres/<栏目名>.txt`**（字符画背景）。
+- 生活侧**新栏目**：新建 `scenes/<栏目>/`，在 `scenes/index.json` 增加对应 key；建议补 **`atmospheres/<栏目名>.txt`**（字符画背景）。若同一路径下另有 **`atmospheres/<栏目名>.png`**（或 `.jpg`/`.jpeg`/`.webp`），生活页会**优先用该图铺满背景**（略压对比与饱和度），不再绘制该栏目的 `.txt`。
 
 ### 5.2 删除
 

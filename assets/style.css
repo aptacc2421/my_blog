@@ -195,6 +195,23 @@ body.life {
   filter: contrast(0.92) saturate(0.85);
 }
 
+/* 与 .txt 二选一：同栏目名下若有 .png/.jpg/.webp 则作铺满底图（优先于字符画） */
+#atmos.atmos-raster {
+  display: block;
+  padding: 0;
+  white-space: normal;
+  font-size: 0;
+  line-height: 0;
+  color: transparent;
+  opacity: 0.52;
+  background-color: var(--bg-void);
+  background-repeat: no-repeat;
+  background-size: cover;
+  /* 略偏上，让画面中部「落地窗」一带落在视区中心附近 */
+  background-position: center 38%;
+  filter: contrast(0.96) saturate(0.82) brightness(0.92);
+}
+
 body.life .fragment {
   position: absolute;
   max-width: var(--fragment-max);
