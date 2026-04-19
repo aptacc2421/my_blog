@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>清除本地片段缓存</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 36rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; color: #222; }
+    code { background: #f0f0f0; padding: 0.1em 0.35em; border-radius: 4px; }
+    button { margin-top: 1rem; padding: 0.5rem 1rem; cursor: pointer; }
+    pre { white-space: pre-wrap; word-break: break-all; background: #f7f7f7; padding: 0.75rem; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>清除本地片段缓存</h1>
+  <p>
+    写作页 <code>:wq</code> 会把正文存进浏览器 <code>localStorage</code>（键名 <code>scene_blob_scenes/…</code>），
+    即使仓库里已删掉对应 <code>.md</code>，旧链接仍可能显示出来。
+  </p>
+  <p>本页将：</p>
+  <ul>
+    <li>删除所有 <code>scene_blob_*</code> 键；</li>
+    <li>把 <code>scenes_index</code> 重置为当前站内的 <code>scenes/index.json</code>；</li>
+    <li>清空待同步队列 <code>archived_pending</code>（若曾用 <code>:push</code> 入队）。</li>
+  </ul>
+  <p><strong>不会</strong>删除写作草稿 <code>draft</code>、技术条目的 <code>tech_blob_*</code> 等。</p>
+  <button type="button" id="go">执行清除</button>
+  <pre id="out" hidden></pre>
+  <script>
+    document.getElementById("go").addEventListener("click", function () {
+      var out = document.getElementById("out");
+      out.hidden = false;
+      out.textContent = "处理中…";
+      fetch("scenes/index.json", { cache: "no-store" })
+        .then(function (r) {
+          if (!r.ok) throw new Error("无法读取 scenes/index.json：" + r.status);
+          return r.json();
+        })
+        .then(function (idx) {
+          var n = 0;
+          Object.keys(localStorage).forEach(function (k) {
+            if (k.indexOf("scene_blob_") === 0) {
+              localStorage.removeItem(k);
+              n++;
+            }
+          });
+          localStorage.setItem("scenes_index", JSON.stringify(idx));
+          localStorage.setItem("archived_pending", "[]");
+          out.textContent =
+            "已删除 scene_blob_* 共 " +
+            n +
+            " 条；scenes_index 已与仓库对齐；archived_pending 已清空。\n请关闭旧 scene 标签页或刷新。";
+        })
+        .catch(function (e) {
+          out.textContent = String(e && e.message ? e.message : e);
+        });
+    });
+  </script>
+</body>
+</html>
