@@ -4,6 +4,9 @@
   var LS_SCENES = "scenes_index";
   var BLOB_PREFIX = "scene_blob_";
 
+  var MSG_EMPTY_DEFAULT =
+    "本世界还没有片段。其它栏目若为空，会一直抽到「无名之地」；也可在写作页 :wq 归档后再刷新。";
+
   var atmos = document.getElementById("atmos");
   var shards = document.getElementById("shards");
 
@@ -18,11 +21,29 @@
     });
   }
 
+  function stripBom(s) {
+    return String(s).replace(/^\uFEFF/, "");
+  }
+
+  /** 与 md-unfussy 一致：###紧贴正文 → ### 正文，便于按标题解析 */
+  function normalizeAtxHeadingSpaces(line) {
+    return String(line).replace(/^(#{1,6})([^\s#])/m, function (_, h, rest) {
+      return h + " " + rest;
+    });
+  }
+
+  /** 链接上只显示「标题」二字，绝不带上 ### */
+  function cleanTitleForDisplay(t) {
+    var s = stripBom(String(t || "").trim());
+    s = s.replace(/^#{1,6}\s*/, "").trim();
+    return s || "（无题）";
+  }
+
   /** 第一行若为 # 标题则取标题文案；否则首行作标题 */
   function extractTitleAndRest(text) {
-    var raw = String(text || "").replace(/\r\n/g, "\n");
+    var raw = stripBom(String(text || "").replace(/\r\n/g, "\n"));
     var lines = raw.split("\n");
-    var first = (lines[0] || "").trim();
+    var first = normalizeAtxHeadingSpaces(stripBom((lines[0] || "").trim()));
     var hm = first.match(/^#{1,6}\s*(.*)$/);
     if (hm) {
       var title = (hm[1] || "").trim();
@@ -45,18 +66,19 @@
 
   function buildFragment(body, cat, file) {
     var meta = extractTitleAndRest(body);
+    var label = cleanTitleForDisplay(meta.title);
     var div = document.createElement("div");
     div.className = "fragment";
 
     var a = document.createElement("a");
     a.className = "fragment-title-link";
-    a.textContent = meta.title;
+    a.textContent = label;
     a.href =
       "scene.html?cat=" +
       encodeURIComponent(cat) +
       "&file=" +
       encodeURIComponent(file);
-    a.setAttribute("aria-label", meta.title + "，打开全文");
+    a.setAttribute("aria-label", label + "，打开全文");
 
     div.appendChild(a);
     return div;
@@ -138,18 +160,21 @@
     return pool[Math.floor(Math.random() * pool.length)];
   }
 
-  /** 若地址栏带 ?cat= 或 ?world=（栏目名须与 scenes/index.json 的 key 完全一致），则固定进入该场景，不随机 */
-  function categoryFromUrl(idx) {
+  /**
+   * ?cat= / ?world= 与 scenes/index.json 的 key 完全一致时固定栏目；
+   * 写错栏目名时单独提示，不再偷偷随机（避免以为 ?cat= 没生效）。
+   */
+  function urlCatRequest(idx) {
     try {
       var p = new URLSearchParams(location.search);
-      var raw = p.get("cat") || p.get("world") || "";
-      if (!raw) return null;
+      var raw = p.get("cat") || p.get("world");
+      if (raw == null || String(raw).trim() === "") return { kind: "none" };
       var name = String(raw).trim();
-      if (!name) return null;
-      if (Object.prototype.hasOwnProperty.call(idx, name)) return name;
-      return null;
+      if (!Object.prototype.hasOwnProperty.call(idx, name))
+        return { kind: "bad", name: name };
+      return { kind: "ok", name: name };
     } catch (_) {
-      return null;
+      return { kind: "none" };
     }
   }
 
@@ -202,14 +227,47 @@
 
   function run() {
     loadIndex().then(function (idx) {
-      var forced = categoryFromUrl(idx);
-      var cat = forced != null ? forced : pickCategory(idx);
-      if (forced != null) {
+      var emptyEl = document.getElementById("shard-empty");
+      var req = urlCatRequest(idx);
+
+      if (req.kind === "bad") {
+        atmos.textContent = " ";
+        if (emptyEl) {
+          emptyEl.hidden = false;
+          emptyEl.textContent =
+            "没有「" +
+            req.name +
+            "」这个栏目（请对照仓库 scenes/index.json 里的栏目名，须完全一致）。本页不会随机到其它世界。";
+        }
+        try {
+          document.title = "生活";
+        } catch (_) {}
+        return;
+      }
+
+      var forced = req.kind === "ok";
+      var cat = forced ? req.name : pickCategory(idx);
+      if (forced) {
         try {
           document.title = cat + " — 生活";
         } catch (_) {}
       }
+
       var files = (idx[cat] && idx[cat].slice()) || [];
+
+      if (forced && files.length === 0) {
+        return loadAtmosphere(cat).then(function (txt) {
+          atmos.textContent = txt || " ";
+          if (emptyEl) {
+            emptyEl.hidden = false;
+            emptyEl.textContent =
+              "「" +
+              cat +
+              "」在索引里还没有任何 .md 文件。请先在写作页 :wq 归入此栏目并推送；或换一个 ?cat= 。";
+          }
+        });
+      }
+
       var n = Math.min(files.length, randInt(3, 6));
       if (files.length && n < 3) n = files.length;
 
@@ -224,8 +282,10 @@
             });
           })
         ).then(function () {
-          var empty = document.getElementById("shard-empty");
-          if (empty) empty.hidden = shards.children.length > 0;
+          if (emptyEl) {
+            emptyEl.hidden = shards.children.length > 0;
+            if (!emptyEl.hidden) emptyEl.textContent = MSG_EMPTY_DEFAULT;
+          }
         });
       });
     }).catch(function () {
