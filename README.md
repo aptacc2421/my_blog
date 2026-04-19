@@ -7,7 +7,7 @@
 ## 访客路径
 
 1. **`index.html`（门厅）**：深色底、居中；上方为简短自述（中文 + 英文，英文里可点 **tech** 直达技术页）。下方两个入口：**若有人问起我**（More about me）→ `life.html`；**技术**（Tech）→ `tech.html`。字体由 `assets/style.css` 与异步加载的 `assets/fonts.css` 提供。
-2. **生活** `life.html`：随机进入一个栏目，字符画铺底、该栏目片段散落；刷新即重掷。左下角 **回** → 门厅。
+2. **生活** `life.html`：随机进入一个栏目，字符画铺底；每个片段只显示**标题**，**点击**进入 **`scene.html`** 阅读该篇 Markdown 全文。刷新即重掷。左下角 **回** → 门厅。
 3. **技术** `tech.html`：暗色 monospace 页；按 `tech/index.json` 列出标题，点击后用 marked 渲染正文。顶链 **回门厅 · Back** → `index.html`。列表为空时对外只显示一句占位（中文「内容将陆续补充。」/ 英文 *Coming soon.*），不涉及写作页。
 
 写作页 `write.html` 不挂在门厅；只有你本人记 URL 使用。

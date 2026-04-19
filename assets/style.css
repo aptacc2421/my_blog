@@ -209,13 +209,11 @@ body.life .fragment {
   hyphens: auto;
 }
 
-body.life .fragment-title-btn {
+body.life .fragment-title-link {
   display: block;
   width: 100%;
   margin: 0;
   padding: 0;
-  border: none;
-  background: transparent;
   font: inherit;
   color: inherit;
   text-align: left;
@@ -226,74 +224,130 @@ body.life .fragment-title-btn {
   text-decoration-color: rgba(201, 176, 106, 0.45);
 }
 
-body.life .fragment-title-btn:hover {
+body.life .fragment-title-link:hover {
   color: var(--gold-bright);
   text-decoration-color: var(--gold-dim);
 }
 
-body.life .fragment-title-btn:focus-visible {
+body.life .fragment-title-link:focus-visible {
   outline: 1px solid var(--gold-dim);
   outline-offset: 2px;
 }
 
-body.life .fragment-panel {
-  margin-top: 0.55rem;
-  max-height: min(55vh, 22rem);
+/* 单篇阅读 scene.html */
+body.life-read {
+  min-height: 100vh;
+  position: relative;
+  background: var(--bg-void);
+  color: var(--text-ash);
+}
+
+body.life-read .back-life {
+  position: fixed;
+  top: 1rem;
+  left: 1.25rem;
+  z-index: 2;
+  font-size: 0.82rem;
+  color: var(--text-faint);
+  text-decoration: none;
+  opacity: 0.55;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+body.life-read .back-life:hover {
+  opacity: 0.9;
+  color: var(--gold-dim);
+}
+
+body.life-read .scene-article {
+  box-sizing: border-box;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 3.25rem 1.35rem 4rem;
+  font-family: var(--serif-zh), var(--serif-en);
+  font-size: clamp(0.88rem, 1.05vw, 0.98rem);
+  line-height: var(--write-line);
+  letter-spacing: 0.02em;
+}
+
+body.life-read .scene-article p {
+  margin: 0 0 0.75em;
+}
+
+body.life-read .scene-article p:last-child {
+  margin-bottom: 0;
+}
+
+body.life-read .scene-article h1,
+body.life-read .scene-article h2,
+body.life-read .scene-article h3,
+body.life-read .scene-article h4 {
+  font-weight: 600;
+  margin: 1em 0 0.5em;
+  color: var(--text-ash);
+}
+
+body.life-read .scene-article h1:first-child,
+body.life-read .scene-article h2:first-child,
+body.life-read .scene-article h3:first-child {
+  margin-top: 0;
+}
+
+body.life-read .scene-article pre,
+body.life-read .scene-article code {
+  font-family: var(--mono-atmos);
+  font-size: 0.9em;
+}
+
+body.life-read .scene-article pre {
+  margin: 0.75em 0;
+  padding: 0.65rem 0.85rem;
   overflow: auto;
-  padding: 0.65rem 0.75rem;
-  font-size: 0.92em;
-  line-height: 1.65;
-  text-shadow: 0 0 0.85em rgba(14, 12, 10, 0.9);
-  background: rgba(10, 9, 8, 0.35);
+  background: rgba(0, 0, 0, 0.35);
   border-radius: 4px;
   border: 1px solid rgba(154, 145, 135, 0.12);
 }
 
-body.life .fragment-panel[hidden] {
-  display: none !important;
-}
-
-body.life .fragment-panel p {
-  margin: 0 0 0.55em;
-}
-
-body.life .fragment-panel p:last-child {
-  margin-bottom: 0;
-}
-
-body.life .fragment-panel h1,
-body.life .fragment-panel h2,
-body.life .fragment-panel h3 {
-  font-size: 1.05em;
-  font-weight: 600;
-  margin: 0.4em 0 0.35em;
-  color: var(--text-ash);
-}
-
-body.life .fragment-panel h1:first-child,
-body.life .fragment-panel h2:first-child,
-body.life .fragment-panel h3:first-child {
-  margin-top: 0;
-}
-
-body.life .fragment-panel pre,
-body.life .fragment-panel code {
-  font-family: var(--mono-atmos);
-  font-size: 0.88em;
-}
-
-body.life .fragment-panel pre {
+body.life-read .scene-article ul,
+body.life-read .scene-article ol {
   margin: 0.5em 0;
-  padding: 0.45em 0.5em;
-  overflow: auto;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 3px;
+  padding-left: 1.35em;
 }
 
-body.life .fragment-panel ul,
-body.life .fragment-panel ol {
-  margin: 0.35em 0;
-  padding-left: 1.25em;
+body.life-read .scene-article a {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+body.life-read .scene-article a:hover {
+  color: var(--gold-bright);
+}
+
+body.life-read .scene-read-err {
+  box-sizing: border-box;
+  max-width: 40rem;
+  margin: 2rem auto 0;
+  padding: 0 1.35rem 3rem;
+  text-align: center;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-dust);
+  opacity: 0.85;
+}
+
+body.life-read .dust-footnote {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  font-size: calc(var(--write-size) * 0.6);
+  letter-spacing: 0.12em;
+  color: var(--text-dust);
+  opacity: 0.5;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 body.life .back-gate {
