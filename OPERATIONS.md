@@ -124,13 +124,20 @@ python3 -m http.server 8000
 
 ---
 
-## 八、相关文件索引
+## 八、Markdown 与渲染
+
+- **生活阅读页 `scene.html`、技术页正文**均使用 **marked** 按 CommonMark 系规则渲染。
+- 标准写法里 **ATX 标题** 要求 `#` 与文字之间有空格（例：`### 你好`）。若你习惯写 **`###你好`**，仓库里的 **`assets/md-unfussy.js`** 会在解析前自动补一个空格，以便仍显示为三级标题。
+- 更稳妥的做法仍是按规范书写，减少对预处理的依赖。
+
+## 九、相关文件索引
 
 | 文件 | 用途 |
 |------|------|
 | `README.md` | 概览、部署、WSL 代理、拆分域名摘要 |
 | `PLAN.md` | 原始设计与数据格式约定 |
 | `PROMPTS.md` | 字符画生成用 prompt 参考 |
+| `assets/md-unfussy.js` | 解析前轻量规范化 Markdown（如 `###标题` → 供 marked 识别） |
 | `scripts/wsl-proxy-env.sh` | 被 `wsl-git.sh` / `wsl-curl.sh` 引用，设置代理环境变量 |
 
 更细的格式约定见 **`PLAN.md`** 第三章；写作命令实现细节以 **`assets/write.js`** 为准。

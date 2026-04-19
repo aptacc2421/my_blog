@@ -25,14 +25,18 @@
   }
 
   function parseMd(md) {
+    var raw =
+      typeof window.normalizeMarkdownForParse === "function"
+        ? window.normalizeMarkdownForParse(md)
+        : md;
     if (window.marked && typeof window.marked.parse === "function") {
       try {
-        return window.marked.parse(md);
+        return window.marked.parse(raw);
       } catch (_) {
-        return "<pre>" + esc(md) + "</pre>";
+        return "<pre>" + esc(raw) + "</pre>";
       }
     }
-    return "<pre>" + esc(md) + "</pre>";
+    return "<pre>" + esc(raw) + "</pre>";
   }
 
   function sceneUrl(cat, file) {
