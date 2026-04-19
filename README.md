@@ -2,6 +2,8 @@
 
 纯静态站点，托管在 GitHub Pages：无构建步骤，内容即 repo 里的 Markdown 与字符画文本。
 
+**完整操作清单（访客路径、写作命令、删改、Git、部署）见 [`OPERATIONS.md`](OPERATIONS.md)。**
+
 ## 访客路径
 
 1. **`index.html`（门厅）**：深色底、居中；上方为简短自述（中文 + 英文，英文里可点 **tech** 直达技术页）。下方两个入口：**若有人问起我**（More about me）→ `life.html`；**技术**（Tech）→ `tech.html`。字体由 `assets/style.css` 与异步加载的 `assets/fonts.css` 提供。
