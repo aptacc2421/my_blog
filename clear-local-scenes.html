@@ -13,9 +13,16 @@
 </head>
 <body>
   <h1>清除本地片段缓存</h1>
+  <p id="origin-info" style="padding:0.65rem 0.75rem;background:#fff8e6;border-radius:6px;border:1px solid #e6d9a8;"></p>
   <p>
     写作页 <code>:wq</code> 会把正文存进浏览器 <code>localStorage</code>（键名 <code>scene_blob_scenes/…</code>），
     即使仓库里已删掉对应 <code>.md</code>，旧链接仍可能显示出来。
+  </p>
+  <p>
+    <strong>重要：</strong>浏览器按「源」隔离存储：<code>127.0.0.1</code> 与 <code>localhost</code>、<code>:8765</code> 与 <code>:8001</code> 都是<strong>不同的存储</strong>。
+    你必须在<strong>与 scene 页完全相同</strong>的地址上打开本页并点清除，否则「没有影响」。
+    例如 scene 是 <code>http://127.0.0.1:8765/scene.html?…</code>，就应访问
+    <code>http://127.0.0.1:8765/clear-local-scenes.html</code>。
   </p>
   <p>本页将：</p>
   <ul>
@@ -27,6 +34,16 @@
   <button type="button" id="go">执行清除</button>
   <pre id="out" hidden></pre>
   <script>
+    (function () {
+      var el = document.getElementById("origin-info");
+      if (el) {
+        el.innerHTML =
+          "<strong>当前源：</strong><code>" +
+          location.origin +
+          "</code><br>下面按钮<strong>只清除这一份</strong> localStorage。";
+      }
+    })();
+
     document.getElementById("go").addEventListener("click", function () {
       var out = document.getElementById("out");
       out.hidden = false;
@@ -47,9 +64,11 @@
           localStorage.setItem("scenes_index", JSON.stringify(idx));
           localStorage.setItem("archived_pending", "[]");
           out.textContent =
-            "已删除 scene_blob_* 共 " +
+            "当前源 " +
+            location.origin +
+            "：已删除 scene_blob_* 共 " +
             n +
-            " 条；scenes_index 已与仓库对齐；archived_pending 已清空。\n请关闭旧 scene 标签页或刷新。";
+            " 条；scenes_index 已与仓库对齐；archived_pending 已清空。\n若其它端口仍有旧文，请在该端口再打开本页清除一次。";
         })
         .catch(function (e) {
           out.textContent = String(e && e.message ? e.message : e);
