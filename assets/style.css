@@ -59,6 +59,51 @@ body.gate main {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 2.25rem;
+  padding: 0 1.5rem;
+}
+
+body.gate .gate-intro {
+  max-width: 26rem;
+  margin: 0;
+  text-align: center;
+}
+
+body.gate .gate-intro p {
+  margin: 0;
+  font-family: var(--serif-zh), var(--serif-en);
+  font-size: 0.92rem;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--text-dust);
+  letter-spacing: 0.03em;
+}
+
+body.gate .gate-intro .gate-intro-en {
+  margin-top: 0.9rem;
+  font-family: var(--serif-en), var(--serif-zh);
+  font-size: 0.86rem;
+  line-height: 1.65;
+  color: var(--text-faint);
+  letter-spacing: 0.01em;
+}
+
+body.gate .gate-intro .gate-intro-tech {
+  color: var(--text-dust);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(154, 145, 135, 0.45);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+body.gate .gate-intro .gate-intro-tech:hover {
+  color: var(--gold);
+  border-bottom-color: var(--gold-dim);
+}
+
+body.gate .gate-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 2.75rem;
 }
 
@@ -74,6 +119,49 @@ body.gate a {
 
 body.gate a:hover {
   color: var(--gold-bright);
+  text-decoration: underline;
+  text-decoration-color: var(--brick);
+}
+
+body.gate .gate-link-life,
+body.gate .gate-link-tech {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  line-height: 1.25;
+}
+
+body.gate .gate-link-life .gate-link-title,
+body.gate .gate-link-tech .gate-link-title {
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+
+body.gate .gate-link-life .gate-link-tag,
+body.gate .gate-link-tech .gate-link-tag {
+  font-family: var(--serif-en), var(--serif-zh);
+  font-size: 0.78rem;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  color: var(--text-dust);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+body.gate .gate-link-life:hover .gate-link-tag,
+body.gate .gate-link-tech:hover .gate-link-tag {
+  color: var(--text-ash);
+}
+
+body.gate .gate-link-life:hover,
+body.gate .gate-link-tech:hover {
+  text-decoration: none;
+}
+
+body.gate .gate-link-life:hover .gate-link-title,
+body.gate .gate-link-tech:hover .gate-link-title {
   text-decoration: underline;
   text-decoration-color: var(--brick);
 }

@@ -97,13 +97,28 @@
   function renderList(rows) {
     listEl.innerHTML = "";
     var h = document.createElement("h1");
-    h.textContent = "技术";
+    h.className = "tech-h1";
+    var hZh = document.createElement("span");
+    hZh.className = "tech-h1-zh";
+    hZh.setAttribute("lang", "zh-CN");
+    hZh.textContent = "技术";
+    var hEn = document.createElement("span");
+    hEn.className = "tech-h1-en";
+    hEn.setAttribute("lang", "en");
+    hEn.textContent = "Tech";
+    h.appendChild(hZh);
+    h.appendChild(hEn);
     listEl.appendChild(h);
     if (!rows.length) {
-      var p = document.createElement("p");
-      p.className = "muted";
-      p.textContent = "暂无条目。可在写作页使用 :t 标题 归档。";
-      listEl.appendChild(p);
+      var pZh = document.createElement("p");
+      pZh.className = "muted";
+      pZh.textContent = "内容将陆续补充。";
+      var pEn = document.createElement("p");
+      pEn.className = "muted muted-en";
+      pEn.setAttribute("lang", "en");
+      pEn.textContent = "Coming soon.";
+      listEl.appendChild(pZh);
+      listEl.appendChild(pEn);
       return;
     }
     var ul = document.createElement("ul");
@@ -128,7 +143,10 @@
     loadArticle(file).then(function (md) {
       if (!md.trim()) {
         articleEl.innerHTML =
-          "<p class=\"muted\">无法加载「" + esc(file) + "」。</p>";
+          "<p class=\"muted\">无法加载「" +
+          esc(file) +
+          "」。</p>" +
+          "<p class=\"muted muted-en\" lang=\"en\">Could not load this file.</p>";
         return;
       }
       articleEl.innerHTML = parseMd(md);

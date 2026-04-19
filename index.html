@@ -4,8 +4,29 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>门厅</title>
+  <style>
+    /* 未拉到外链时至少黑底，避免白闪 */
+    html, body { margin: 0; min-height: 100%; background: #0e0c0a; color: #d8cfc2; }
+  </style>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/fonts.css" media="print" onload="this.media='all'">
 </head>
-<body>
-  <!-- 步骤 8 将补全门厅：生活 / 技术 -->
+<body class="gate">
+  <main>
+    <div class="gate-intro">
+      <p>这里会陆续放些手记与备忘，还称不上「作品」；你若路过，随便看看就好。</p>
+      <p class="gate-intro-en" lang="en">I spend more time in open-source communities now. This site will stay a mix of Chinese and English—read whichever is easier for you. Technical readers: start with <a href="tech.html" class="gate-intro-tech">tech</a> below.</p>
+    </div>
+    <nav class="gate-links" aria-label="站点入口">
+      <a href="life.html" class="gate-link-life">
+        <span class="gate-link-title">若有人问起我</span>
+        <span class="gate-link-tag" lang="en">More about me</span>
+      </a>
+      <a href="tech.html" class="gate-link-tech">
+        <span class="gate-link-title">技术</span>
+        <span class="gate-link-tag" lang="en">Tech</span>
+      </a>
+    </nav>
+  </main>
 </body>
 </html>
