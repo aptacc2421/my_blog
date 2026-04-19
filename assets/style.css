@@ -205,16 +205,95 @@ body.life .fragment {
   color: var(--text-ash);
   opacity: 0.88;
   text-shadow: 0 0 1.25em rgba(14, 12, 10, 0.85), 0 1px 0 rgba(20, 18, 16, 0.4);
-  pointer-events: none;
+  pointer-events: auto;
   hyphens: auto;
 }
 
-body.life .fragment p {
-  margin: 0 0 0.6em;
+body.life .fragment-title-btn {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  text-shadow: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-color: rgba(201, 176, 106, 0.45);
 }
 
-body.life .fragment p:last-child {
+body.life .fragment-title-btn:hover {
+  color: var(--gold-bright);
+  text-decoration-color: var(--gold-dim);
+}
+
+body.life .fragment-title-btn:focus-visible {
+  outline: 1px solid var(--gold-dim);
+  outline-offset: 2px;
+}
+
+body.life .fragment-panel {
+  margin-top: 0.55rem;
+  max-height: min(55vh, 22rem);
+  overflow: auto;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.92em;
+  line-height: 1.65;
+  text-shadow: 0 0 0.85em rgba(14, 12, 10, 0.9);
+  background: rgba(10, 9, 8, 0.35);
+  border-radius: 4px;
+  border: 1px solid rgba(154, 145, 135, 0.12);
+}
+
+body.life .fragment-panel[hidden] {
+  display: none !important;
+}
+
+body.life .fragment-panel p {
+  margin: 0 0 0.55em;
+}
+
+body.life .fragment-panel p:last-child {
   margin-bottom: 0;
+}
+
+body.life .fragment-panel h1,
+body.life .fragment-panel h2,
+body.life .fragment-panel h3 {
+  font-size: 1.05em;
+  font-weight: 600;
+  margin: 0.4em 0 0.35em;
+  color: var(--text-ash);
+}
+
+body.life .fragment-panel h1:first-child,
+body.life .fragment-panel h2:first-child,
+body.life .fragment-panel h3:first-child {
+  margin-top: 0;
+}
+
+body.life .fragment-panel pre,
+body.life .fragment-panel code {
+  font-family: var(--mono-atmos);
+  font-size: 0.88em;
+}
+
+body.life .fragment-panel pre {
+  margin: 0.5em 0;
+  padding: 0.45em 0.5em;
+  overflow: auto;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 3px;
+}
+
+body.life .fragment-panel ul,
+body.life .fragment-panel ol {
+  margin: 0.35em 0;
+  padding-left: 1.25em;
 }
 
 body.life .back-gate {

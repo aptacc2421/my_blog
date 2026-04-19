@@ -36,6 +36,83 @@
       .join("");
   }
 
+  /** 第一行若为 # 标题则取标题文案，其余为正文；否则首行作标题，其余作正文 */
+  function extractTitleAndRest(text) {
+    var raw = String(text || "").replace(/\r\n/g, "\n");
+    var lines = raw.split("\n");
+    var first = (lines[0] || "").trim();
+    var hm = first.match(/^#{1,6}\s*(.*)$/);
+    if (hm) {
+      var title = (hm[1] || "").trim();
+      if (!title) title = first.replace(/^#+\s*/, "").trim() || "（无题）";
+      return {
+        title: title,
+        rest: lines.slice(1).join("\n").trim(),
+        full: raw,
+      };
+    }
+    if (lines.length <= 1) {
+      return { title: first || "（无题）", rest: "", full: raw };
+    }
+    return {
+      title: first,
+      rest: lines.slice(1).join("\n").trim(),
+      full: raw,
+    };
+  }
+
+  function markdownForPanel(meta) {
+    if (meta.rest.length) return meta.rest;
+    return meta.full;
+  }
+
+  function parseMd(md) {
+    if (window.marked && typeof window.marked.parse === "function") {
+      try {
+        return window.marked.parse(md);
+      } catch (_) {
+        return mdToHtml(md);
+      }
+    }
+    return mdToHtml(md);
+  }
+
+  function buildFragment(body) {
+    var meta = extractTitleAndRest(body);
+    var md = markdownForPanel(meta);
+    var div = document.createElement("div");
+    div.className = "fragment";
+
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "fragment-title-btn";
+    btn.textContent = meta.title;
+    btn.setAttribute("aria-expanded", "false");
+    var panelId = "fragment-panel-" + String(Math.random()).slice(2, 11);
+    btn.id = "btn-" + panelId;
+
+    var panel = document.createElement("div");
+    panel.id = panelId;
+    panel.className = "fragment-panel";
+    panel.hidden = true;
+    panel.setAttribute("role", "region");
+    panel.setAttribute("aria-labelledby", btn.id);
+    btn.setAttribute("aria-controls", panelId);
+    panel.innerHTML = parseMd(md);
+
+    btn.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var open = panel.hidden;
+      panel.hidden = !open;
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+
+    div.appendChild(btn);
+    div.appendChild(panel);
+    return div;
+  }
+
   function shuffle(a) {
     var i = a.length;
     while (i > 1) {
@@ -173,9 +250,7 @@
           picks.map(function (f) {
             return loadSceneText(cat, f).then(function (body) {
               if (!body.trim()) return;
-              var div = document.createElement("div");
-              div.innerHTML = mdToHtml(body);
-              placeFragment(div);
+              placeFragment(buildFragment(body));
             });
           })
         ).then(function () {
