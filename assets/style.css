@@ -175,10 +175,20 @@ body.life {
   color: var(--text-ash);
 }
 
+/* 子元素全是 position:absolute 时，若此处高度为 0，则 top 的 % 相对高度为 0，碎片会全部挤到顶端 */
+body.life #shards {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  min-height: 100vh;
+  min-width: 100%;
+}
+
+/* 勿用 z-index: -1：会整层落到 body 背景色下方，栅格图（.png 等）会「消失」 */
 #atmos {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   margin: 0;
   padding: 1.5vmin;
   white-space: pre;
@@ -186,7 +196,8 @@ body.life {
   font-size: clamp(7px, 1.1vmin, 11px);
   line-height: 1.05;
   color: var(--slate);
-  opacity: 0.38;
+  /* 空 .txt 时原先几乎不可见；略提高以便字符画底纹能辨认 */
+  opacity: 0.5;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -209,11 +220,12 @@ body.life {
   background-size: cover;
   /* 略偏上，让画面中部「落地窗」一带落在视区中心附近 */
   background-position: center 38%;
-  filter: contrast(0.96) saturate(0.82) brightness(0.92);
+  filter: contrast(0.98) saturate(0.88) brightness(1);
 }
 
 body.life .fragment {
   position: absolute;
+  z-index: 1;
   max-width: var(--fragment-max);
   padding: 0;
   font-family: var(--serif-zh), var(--serif-en);
@@ -277,6 +289,8 @@ body.life-read .back-life:hover {
 }
 
 body.life-read .scene-article {
+  position: relative;
+  z-index: 1;
   box-sizing: border-box;
   max-width: 40rem;
   margin: 0 auto;
@@ -342,6 +356,8 @@ body.life-read .scene-article a:hover {
 }
 
 body.life-read .scene-read-err {
+  position: relative;
+  z-index: 1;
   box-sizing: border-box;
   max-width: 40rem;
   margin: 2rem auto 0;
@@ -351,6 +367,31 @@ body.life-read .scene-read-err {
   line-height: 1.6;
   color: var(--text-dust);
   opacity: 0.85;
+}
+
+/* 建站说明（日期在 assets/site-meta.js 的 blogSince 修改） */
+body.life .blog-since,
+body.life-read .blog-since {
+  position: fixed;
+  z-index: 1;
+  bottom: 2.35rem;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0;
+  max-width: min(96vw, 28rem);
+  font-size: calc(var(--write-size) * 0.44);
+  letter-spacing: 0.05em;
+  line-height: 1.35;
+  text-align: center;
+  color: var(--text-faint);
+  opacity: 0.42;
+  pointer-events: none;
+}
+
+body.life .blog-since:empty,
+body.life-read .blog-since:empty {
+  display: none;
 }
 
 /* 脚注彩蛋：具体位置与透明度由 dust-easter.js 随机；无 JS 时仍略可见 */
@@ -434,6 +475,10 @@ body.write.mode-command #buf {
   caret-shape: block;
 }
 
+body.write.mode-ask-category #buf {
+  pointer-events: none;
+}
+
 #cat-hint {
   position: fixed;
   left: 0;
@@ -456,6 +501,10 @@ body.write.mode-command #buf {
   left: 0;
   right: 0;
   bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15em 0.35em;
   padding: 0.55rem 8vmin 0.75rem;
   font-family: var(--serif-en), var(--serif-zh);
   font-size: 0.82rem;
@@ -477,4 +526,29 @@ body.write.mode-command #buf {
 #cmdline .cmd-prefix {
   color: var(--slate);
   margin-right: 0.25em;
+}
+
+body.write #category-input.category-input {
+  flex: 1 1 12rem;
+  min-width: 8rem;
+  max-width: 100%;
+  margin: 0;
+  padding: 0.1em 0;
+  border: none;
+  border-bottom: 1px solid rgba(154, 138, 94, 0.35);
+  background: transparent;
+  font: inherit;
+  font-size: 0.95em;
+  color: var(--gold);
+  caret-color: var(--gold-bright);
+  outline: none;
+}
+
+body.write #category-input.category-input:focus {
+  border-bottom-color: var(--gold-dim);
+}
+
+body.write #category-input.category-input::placeholder {
+  color: var(--text-faint);
+  opacity: 0.65;
 }

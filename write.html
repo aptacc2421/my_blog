@@ -3,14 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>写作</title>
+  <title>写作 · 手记与片段</title>
   <link rel="stylesheet" href="assets/style.css">
   <link rel="stylesheet" href="assets/fonts.css" media="print" onload="this.media='all'">
 </head>
 <body class="write mode-insert">
   <textarea id="buf" spellcheck="false" aria-label="正文"></textarea>
   <div id="cat-hint" hidden></div>
-  <div id="cmdline-wrap" hidden><span id="cmdline"></span></div>
+  <div id="cmdline-wrap" hidden>
+    <span id="cmdline"></span>
+    <input type="text" id="category-input" class="category-input" hidden lang="zh-CN" autocomplete="off" spellcheck="false" aria-label="栏目名" />
+  </div>
+  <script src="assets/site-meta.js"></script>
   <script src="assets/write.js"></script>
 </body>
 </html>

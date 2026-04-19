@@ -25,16 +25,17 @@
   var catHint = document.getElementById("cat-hint");
   var cmdlineWrap = document.getElementById("cmdline-wrap");
   var cmdline = document.getElementById("cmdline");
+  var categoryInput = document.getElementById("category-input");
 
   var mode = "insert";
   var cmdBuffer = "";
-  var categoryBuffer = "";
   var tabMatches = [];
   var tabIndex = 0;
 
   function syncBodyClass() {
     document.body.classList.toggle("mode-insert", mode === "insert");
     document.body.classList.toggle("mode-command", mode !== "insert");
+    document.body.classList.toggle("mode-ask-category", mode === "askCategory");
   }
 
   function setMode(next) {
@@ -312,15 +313,17 @@
     cmdlineWrap.hidden = true;
     catHint.hidden = true;
     cmdBuffer = "";
-    categoryBuffer = "";
     cmdline.textContent = "";
+    categoryInput.hidden = true;
+    categoryInput.value = "";
+    buf.tabIndex = 0;
   }
 
   function renderCmdline() {
     if (mode === "cmdline") {
       cmdline.textContent = ":" + cmdBuffer;
     } else if (mode === "askCategory") {
-      cmdline.textContent = "栏目：" + categoryBuffer;
+      cmdline.textContent = "栏目：";
     }
   }
 
@@ -328,20 +331,36 @@
     mode = "cmdline";
     syncBodyClass();
     cmdBuffer = "";
+    categoryInput.hidden = true;
+    categoryInput.value = "";
     cmdlineWrap.hidden = false;
     catHint.hidden = true;
     renderCmdline();
   }
 
+  function focusCategoryField() {
+    buf.blur();
+    window.setTimeout(function () {
+      categoryInput.focus({ preventScroll: true });
+    }, 0);
+  }
+
   function openAskCategory() {
     mode = "askCategory";
     syncBodyClass();
-    categoryBuffer = "";
+    tabIndex = -1;
+    buf.tabIndex = -1;
+    categoryInput.value = "";
+    categoryInput.hidden = false;
     var cols = categoriesSorted();
     catHint.textContent = cols.join("　");
     catHint.hidden = false;
     cmdlineWrap.hidden = false;
     renderCmdline();
+    buf.blur();
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(focusCategoryField);
+    });
   }
 
   function flashHint(msg, holdMs) {
@@ -753,12 +772,16 @@
 
   function execCommandLine() {
     var line = cmdBuffer.trim();
-    hideCmdUi();
 
     if (line === "wq") {
+      cmdBuffer = "";
+      cmdline.textContent = "";
+      catHint.hidden = true;
       runWq();
       return;
     }
+
+    hideCmdUi();
     if (line === "q!") {
       runQBang();
       return;
@@ -796,18 +819,17 @@
 
   function tabCompleteCategory() {
     var cols = categoriesSorted();
-    var prefix = categoryBuffer;
+    var prefix = categoryInput.value;
     tabMatches = cols.filter(function (c) {
       return !prefix || c.indexOf(prefix) === 0;
     });
     if (!tabMatches.length) return;
     tabIndex = (tabIndex + 1) % tabMatches.length;
-    categoryBuffer = tabMatches[tabIndex];
-    renderCmdline();
+    categoryInput.value = tabMatches[tabIndex];
   }
 
   function submitCategory() {
-    var raw = categoryBuffer.trim();
+    var raw = categoryInput.value.trim();
     var category = raw || "无名之地";
     var idx = ensureScenesIndex();
     var isNew = !Object.prototype.hasOwnProperty.call(idx, category);
@@ -922,6 +944,31 @@
         buf.focus();
         return;
       }
+      if (ev.target === buf) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        focusCategoryField();
+        return;
+      }
+      var catFocused = ev.target === categoryInput;
+      if (catFocused && (ev.isComposing || ev.key === "Process")) {
+        return;
+      }
+      if (catFocused) {
+        if (ev.key === "Tab") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          tabCompleteCategory();
+          return;
+        }
+        if (ev.key === "Enter") {
+          ev.preventDefault();
+          ev.stopPropagation();
+          submitCategory();
+          return;
+        }
+        return;
+      }
       if (ev.key === "Enter") {
         ev.preventDefault();
         ev.stopPropagation();
@@ -937,17 +984,17 @@
       if (ev.key === "Backspace") {
         ev.preventDefault();
         ev.stopPropagation();
-        categoryBuffer = categoryBuffer.slice(0, -1);
+        categoryInput.value = categoryInput.value.slice(0, -1);
+        categoryInput.focus();
         tabIndex = -1;
-        renderCmdline();
         return;
       }
       if (ev.key.length === 1 && !ev.ctrlKey && !ev.metaKey && !ev.altKey) {
         ev.preventDefault();
         ev.stopPropagation();
-        categoryBuffer += ev.key;
+        categoryInput.value += ev.key;
+        categoryInput.focus();
         tabIndex = -1;
-        renderCmdline();
         return;
       }
       ev.preventDefault();

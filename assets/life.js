@@ -10,6 +10,16 @@
   var atmos = document.getElementById("atmos");
   var shards = document.getElementById("shards");
 
+  function siteBrand() {
+    var m = typeof window !== "undefined" && window.SITE_META;
+    return m && m.brand ? m.brand : "生活 · 手记与片段";
+  }
+
+  function siteBrandShort() {
+    var m = typeof window !== "undefined" && window.SITE_META;
+    return m && m.brandShort ? m.brandShort : "生活";
+  }
+
   function fetchTimed(url, ms) {
     ms = ms || 8000;
     var ctrl = new AbortController();
@@ -222,6 +232,23 @@
     atmos.textContent = res.text != null && res.text !== "" ? res.text : " ";
   }
 
+  var ATMOS_RASTER_EXTS = [".png", ".jpg", ".jpeg", ".webp", ".svg"];
+
+  /** 栏目 .txt 为空时仍铺一层可见底纹（真「照片」请放同名的 .png/.jpg/.webp/.svg） */
+  function fillAtmosAscii(txt) {
+    var t = String(txt || "").replace(/\r\n/g, "\n").trim();
+    if (t) return t;
+    return (
+      "      * . * . * . * . * . *\n" +
+      "    .   ~   ~   ~   ~   .\n" +
+      "      * . * . * . * . * . *\n" +
+      "  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~\n" +
+      "      . * . * . * . * . *\n" +
+      "    *   ~   ~   ~   ~   *\n" +
+      "      . * . * . * . * . *\n"
+    );
+  }
+
   function tryRasterExt(cat, exts, idx) {
     if (idx >= exts.length) return Promise.resolve(null);
     var url = "atmospheres/" + encodeURIComponent(cat) + exts[idx];
@@ -235,9 +262,9 @@
       });
   }
 
-  /** 优先同栏目名的 .png/.jpg/.webp，否则回退 atmospheres/<栏目>.txt 字符画 */
+  /** 优先同栏目名的栅格图，否则回退 atmospheres/<栏目>.txt 字符画 */
   function loadAtmosphere(cat) {
-    return tryRasterExt(cat, [".png", ".jpg", ".jpeg", ".webp"], 0).then(function (imgUrl) {
+    return tryRasterExt(cat, ATMOS_RASTER_EXTS, 0).then(function (imgUrl) {
       if (imgUrl) return { mode: "image", url: imgUrl };
       return fetchTimed("atmospheres/" + encodeURIComponent(cat) + ".txt", 8000)
         .then(function (r) {
@@ -248,7 +275,7 @@
           return "";
         })
         .then(function (txt) {
-          return { mode: "ascii", text: txt || " " };
+          return { mode: "ascii", text: fillAtmosAscii(txt) };
         });
     });
   }
@@ -268,7 +295,7 @@
       var req = urlCatRequest(idx);
 
       if (req.kind === "bad") {
-        applyAtmosResult({ mode: "ascii", text: " " });
+        applyAtmosResult({ mode: "ascii", text: fillAtmosAscii("") });
         if (emptyEl) {
           emptyEl.hidden = false;
           emptyEl.textContent =
@@ -277,18 +304,20 @@
             "」这个栏目（请对照仓库 scenes/index.json 里的栏目名，须完全一致）。本页不会随机到其它世界。";
         }
         try {
-          document.title = "生活";
+          document.title = siteBrand();
         } catch (_) {}
         return;
       }
 
       var forced = req.kind === "ok";
       var cat = forced ? req.name : pickCategory(idx);
-      if (forced) {
-        try {
-          document.title = cat + " — 生活";
-        } catch (_) {}
-      }
+      try {
+        if (forced) {
+          document.title = cat + " — " + siteBrand();
+        } else {
+          document.title = siteBrand();
+        }
+      } catch (_) {}
 
       var files = (idx[cat] && idx[cat].slice()) || [];
 
@@ -326,7 +355,7 @@
         });
       });
     }).catch(function () {
-      applyAtmosResult({ mode: "ascii", text: " " });
+      applyAtmosResult({ mode: "ascii", text: fillAtmosAscii("") });
     });
   }
 
