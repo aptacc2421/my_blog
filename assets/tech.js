@@ -52,6 +52,13 @@
       });
   }
 
+  function highlightCode(root) {
+    if (!window.hljs || !root) return;
+    root.querySelectorAll("pre code").forEach(function (el) {
+      hljs.highlightElement(el);
+    });
+  }
+
   function parseMd(md) {
     var raw =
       typeof window.normalizeMarkdownForParse === "function"
@@ -59,12 +66,23 @@
         : md;
     if (window.marked && typeof window.marked.parse === "function") {
       try {
+        if (typeof window.marked.use === "function") {
+          window.marked.use({ gfm: true, breaks: false });
+        }
         return window.marked.parse(raw);
       } catch (_) {
         return "<pre>" + esc(raw) + "</pre>";
       }
     }
     return "<pre>" + esc(raw) + "</pre>";
+  }
+
+  function queryFile() {
+    try {
+      return new URLSearchParams(window.location.search).get("file") || "";
+    } catch (_) {
+      return "";
+    }
   }
 
   function esc(s) {
@@ -154,9 +172,18 @@
         return;
       }
       articleEl.innerHTML = parseMd(md);
+      highlightCode(articleEl);
     });
     window.scrollTo({ top: articleEl.offsetTop - 8, behavior: "smooth" });
   }
 
-  loadIndex().then(renderList);
+  loadIndex().then(function (rows) {
+    renderList(rows);
+    var file = queryFile();
+    if (!file) return;
+    var row = rows.filter(function (r) {
+      return r.file === file;
+    })[0];
+    if (row) openArticle(row.file, row.title);
+  });
 })();
