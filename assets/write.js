@@ -683,10 +683,11 @@
     }
     var name = title.trim();
     var file = techFilename(name);
+    var written = new Date().toISOString().slice(0, 10);
     var rel = "tech/" + file;
     var text = buf.value;
     var list = getTechIndex();
-    list.push({ file: file, title: name });
+    list.push({ file: file, title: name, date: written });
     setTechIndex(list);
     localStorage.setItem(TECH_BLOB_PREFIX + rel, text);
     tryGithubTechOrQueue(rel, text, list).then(function (hint) {

@@ -24,12 +24,32 @@
       if (!Array.isArray(arr)) return;
       arr.forEach(function (row) {
         if (!row || !row.file) return;
-        map[row.file] = { file: row.file, title: row.title || row.file };
+        var prev = map[row.file];
+        map[row.file] = {
+          file: row.file,
+          title: row.title || (prev && prev.title) || row.file,
+          date: row.date || (prev && prev.date) || parseDateFromFile(row.file),
+        };
       });
     });
     return Object.keys(map).map(function (k) {
       return map[k];
     });
+  }
+
+  function parseDateFromFile(file) {
+    var m = String(file || "").match(/^(\d{4}-\d{2}-\d{2})-/);
+    return m ? m[1] : "";
+  }
+
+  function formatWrittenAt(iso) {
+    if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "";
+    var p = iso.split("-");
+    return p[0] + " 年 " + parseInt(p[1], 10) + " 月 " + parseInt(p[2], 10) + " 日";
+  }
+
+  function articleDate(row) {
+    return (row && row.date) || parseDateFromFile(row && row.file) || "";
   }
 
   function loadIndex() {
@@ -148,19 +168,29 @@
       var li = document.createElement("li");
       var a = document.createElement("a");
       a.href = "#";
+      a.className = "tech-list-title";
       a.textContent = row.title;
       a.setAttribute("data-file", row.file);
       a.addEventListener("click", function (ev) {
         ev.preventDefault();
-        openArticle(row.file, row.title);
+        openArticle(row);
       });
       li.appendChild(a);
+      var written = articleDate(row);
+      if (written) {
+        var time = document.createElement("time");
+        time.className = "tech-list-date";
+        time.dateTime = written;
+        time.textContent = written;
+        li.appendChild(time);
+      }
       ul.appendChild(li);
     });
     listEl.appendChild(ul);
   }
 
-  function openArticle(file, title) {
+  function openArticle(row) {
+    var file = row.file;
     articleEl.innerHTML = "";
     loadArticle(file).then(function (md) {
       if (!md.trim()) {
@@ -171,7 +201,15 @@
           "<p class=\"muted muted-en\" lang=\"en\">Could not load this file.</p>";
         return;
       }
-      articleEl.innerHTML = parseMd(md);
+      var html = parseMd(md);
+      var written = articleDate(row);
+      if (written) {
+        html +=
+          "<p class=\"tech-written-at\">写于 " +
+          esc(formatWrittenAt(written)) +
+          "</p>";
+      }
+      articleEl.innerHTML = html;
       highlightCode(articleEl);
     });
     window.scrollTo({ top: articleEl.offsetTop - 8, behavior: "smooth" });
@@ -184,6 +222,6 @@
     var row = rows.filter(function (r) {
       return r.file === file;
     })[0];
-    if (row) openArticle(row.file, row.title);
+    if (row) openArticle(row);
   });
 })();
