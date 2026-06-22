@@ -13,7 +13,7 @@
     var t = setTimeout(function () {
       ctrl.abort();
     }, ms);
-    return fetch(url, { signal: ctrl.signal }).finally(function () {
+    return fetch(url, { signal: ctrl.signal, cache: "no-store" }).finally(function () {
       clearTimeout(t);
     });
   }
