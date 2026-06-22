@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tech · 技术</title>
   <style>
-    /* 技术侧：暗色模式 — 暖炭底 + 灰青字色（仍偏暖，不冷灰、不红） */
+    /* 技术侧：暗色模式 — 整页一道纵向渐变，随内容高度延展 */
     html {
-      height: 100%;
+      min-height: 100%;
+      background-color: #161412;
     }
     body {
       margin: 0;
@@ -17,33 +18,30 @@
       font-family: ui-monospace, "Cascadia Code", Consolas, "DejaVu Sans Mono", monospace;
       font-size: 15px;
       line-height: 1.55;
-      background-color: #1a1816;
-      background-image:
-        linear-gradient(180deg, rgba(255, 235, 210, 0.055) 0%, transparent 32%),
-        linear-gradient(168deg, #2c2826 0%, #201e1c 48%, #161412 100%);
+      background: transparent;
     }
     body::before {
       content: "";
-      position: fixed;
+      position: absolute;
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      opacity: 0.035;
+      background:
+        linear-gradient(180deg, rgba(255, 235, 210, 0.05) 0%, transparent 20%),
+        linear-gradient(180deg, #2c2826 0%, #201e1c 48%, #161412 100%);
+    }
+    body::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.03;
       background-image: repeating-linear-gradient(
         90deg,
         transparent 0 1px,
         rgba(255, 255, 255, 0.03) 1px 2px
       );
-    }
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      box-shadow:
-        inset 0 1px 0 rgba(255, 240, 220, 0.04),
-        inset 0 0 100px rgba(0, 0, 0, 0.35);
     }
     .nav-back,
     #list,
@@ -107,19 +105,39 @@
     #article {
       max-width: 46rem;
       margin: 0 auto 3rem;
-      padding: 0 1.25rem;
-      border-top: 1px solid rgba(255, 240, 230, 0.12);
-      padding-top: 1.5rem;
+      padding: 0 1.25rem 3rem;
     }
     #article:empty {
       display: none;
     }
     #article h1,
     #article h2,
-    #article h3 {
+    #article h3,
+    #article h4,
+    #article h5,
+    #article h6 {
       font-family: inherit;
       font-weight: 600;
       color: #c8dce0;
+      margin: 1.25em 0 0.5em;
+      line-height: 1.35;
+    }
+    #article h1:first-child,
+    #article h2:first-child,
+    #article h3:first-child {
+      margin-top: 0;
+    }
+    #article h1 { font-size: 1.35rem; }
+    #article h2 { font-size: 1.15rem; }
+    #article h3 { font-size: 1.05rem; }
+    #article h4 { font-size: 1rem; color: #b8ccd0; }
+    #article h5 { font-size: 0.95rem; color: #a8bcc0; }
+    #article h6 { font-size: 0.9rem; color: #98acb0; }
+    #article p {
+      margin: 0 0 0.85em;
+    }
+    #article p:last-child {
+      margin-bottom: 0;
     }
     #article a {
       color: #7ec8c4;
@@ -127,19 +145,157 @@
     #article a:hover {
       color: #a8ebe6;
     }
-    #article pre,
+    #article ul,
+    #article ol {
+      margin: 0.5em 0 0.85em;
+      padding-left: 1.5em;
+    }
+    #article li {
+      margin: 0.25em 0;
+    }
+    #article li > ul,
+    #article li > ol {
+      margin-top: 0.25em;
+      margin-bottom: 0.25em;
+    }
+    #article blockquote {
+      margin: 0.75em 0;
+      padding: 0.35em 0 0.35em 1em;
+      border-left: 3px solid #5a9aa0;
+      color: #b8b2aa;
+      background: rgba(0, 0, 0, 0.15);
+    }
+    #article blockquote > :first-child {
+      margin-top: 0;
+    }
+    #article blockquote > :last-child {
+      margin-bottom: 0;
+    }
+    #article hr {
+      margin: 1.5em 0;
+      border: none;
+      border-top: 1px solid rgba(255, 240, 230, 0.15);
+    }
+    #article table {
+      width: 100%;
+      margin: 0.75em 0 1em;
+      border-collapse: collapse;
+      font-size: 0.92em;
+    }
+    #article th,
+    #article td {
+      padding: 0.45em 0.65em;
+      border: 1px solid rgba(255, 240, 230, 0.14);
+      text-align: left;
+    }
+    #article th {
+      background: rgba(90, 154, 160, 0.15);
+      color: #c8dce0;
+      font-weight: 600;
+    }
+    #article tr:nth-child(even) td {
+      background: rgba(0, 0, 0, 0.12);
+    }
+    #article img {
+      max-width: 100%;
+      height: auto;
+      margin: 0.5em 0;
+      border-radius: 2px;
+      border: 1px solid rgba(255, 240, 230, 0.1);
+    }
+    #article del {
+      color: #8f8983;
+      text-decoration: line-through;
+    }
+    #article input[type="checkbox"] {
+      margin-right: 0.35em;
+      accent-color: #5a9aa0;
+      vertical-align: middle;
+    }
     #article code {
       font-family: inherit;
-      background: #22201e;
-      color: #e6e1da;
-      border: 1px solid rgba(255, 245, 235, 0.1);
-      border-left: 3px solid #5a9aa0;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      font-size: 0.92em;
+      background: rgba(34, 32, 30, 0.85);
+      color: #c5e8e4;
+      padding: 0.12em 0.35em;
+      border-radius: 3px;
+      border: 1px solid rgba(255, 245, 235, 0.08);
     }
     #article pre {
-      padding: 0.75rem 1rem;
+      font-family: inherit;
+      background: #1e1c1a;
+      color: #ddd8d0;
+      border: 1px solid rgba(255, 245, 235, 0.08);
+      border-left: 3px solid #5a9aa0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      padding: 0.85rem 1rem;
       overflow: auto;
+      border-radius: 4px;
+      margin: 0.85em 0 1em;
+    }
+    #article pre code {
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: inherit;
+      font-size: 0.94em;
+      line-height: 1.5;
+    }
+    /* highlight.js — 暖暗色 token，与页面灰青/暖金一致 */
+    #article pre code.hljs {
+      display: block;
+      overflow-x: auto;
+    }
+    #article .hljs-comment,
+    #article .hljs-quote {
+      color: #7a7570;
+      font-style: italic;
+    }
+    #article .hljs-keyword,
+    #article .hljs-selector-tag,
+    #article .hljs-built_in {
+      color: #7ec8c4;
+    }
+    #article .hljs-string,
+    #article .hljs-regexp,
+    #article .hljs-template-variable {
+      color: #c9b06a;
+    }
+    #article .hljs-number,
+    #article .hljs-literal {
+      color: #dcc47a;
+    }
+    #article .hljs-title,
+    #article .hljs-title.function_,
+    #article .hljs-function .hljs-title {
+      color: #a8ebe6;
+    }
+    #article .hljs-variable,
+    #article .hljs-params,
+    #article .hljs-attr {
+      color: #ddd8d0;
+    }
+    #article .hljs-type,
+    #article .hljs-class .hljs-title {
+      color: #8ab8bc;
+    }
+    #article .hljs-meta,
+    #article .hljs-subst {
+      color: #b8b2aa;
+    }
+    #article kbd {
+      display: inline-block;
+      padding: 0.1em 0.4em;
+      font-size: 0.88em;
+      background: #2a2826;
+      border: 1px solid rgba(255, 240, 230, 0.2);
       border-radius: 3px;
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+    }
+    #article mark {
+      background: rgba(90, 154, 160, 0.35);
+      color: inherit;
+      padding: 0 0.15em;
     }
     .muted {
       color: #8f8983;
@@ -159,6 +315,7 @@
   </style>
   <script src="assets/md-unfussy.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
 </head>
 <body>
   <a class="nav-back" href="index.html">回门厅<span class="nav-back-en" lang="en"> · Back</span></a>
