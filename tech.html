@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tech · 技术</title>
+  <link rel="stylesheet" href="assets/fonts.css" media="print" onload="this.media='all'">
   <style>
     /* 技术侧：暗色模式 — 整页一道纵向渐变，随内容高度延展 */
     html {
@@ -88,10 +89,12 @@
       letter-spacing: 0.06em;
     }
     #list h1.tech-h1 .tech-h1-en {
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      color: #8a9398;
+      font-family: "EB Garamond", "LXGW WenKai", Georgia, serif;
+      font-size: 0.78rem;
+      font-weight: 400;
+      font-style: italic;
+      letter-spacing: 0.04em;
+      color: #9a9187;
       text-shadow: none;
     }
     #list ul {
@@ -100,7 +103,25 @@
       margin: 0;
     }
     #list li {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
       margin: 0.4rem 0;
+    }
+    #list .tech-list-title {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    #list .tech-list-date {
+      flex: 0 0 auto;
+      font-family: "EB Garamond", "LXGW WenKai", Georgia, serif;
+      font-size: 0.78rem;
+      font-weight: 400;
+      font-style: italic;
+      color: #9a9187;
+      letter-spacing: 0.04em;
+      font-variant-numeric: tabular-nums;
     }
     #article {
       max-width: 46rem;
@@ -297,6 +318,18 @@
       color: inherit;
       padding: 0 0.15em;
     }
+    #article .tech-written-at {
+      margin: 2.25em 0 0;
+      padding-top: 0.85em;
+      border-top: 1px solid rgba(255, 240, 230, 0.08);
+      font-family: "EB Garamond", "LXGW WenKai", Georgia, serif;
+      font-size: 0.78rem;
+      font-weight: 400;
+      font-style: italic;
+      color: #9a9187;
+      text-align: right;
+      letter-spacing: 0.04em;
+    }
     .muted {
       color: #8f8983;
       font-size: 0.9rem;
@@ -308,9 +341,13 @@
       color: #7a7570;
     }
     .nav-back-en {
+      font-family: "EB Garamond", "LXGW WenKai", Georgia, serif;
       font-size: 0.72rem;
-      color: #7a7570;
+      font-weight: 400;
+      font-style: italic;
+      color: #9a9187;
       margin-left: 0.35em;
+      letter-spacing: 0.04em;
     }
   </style>
   <script src="assets/md-unfussy.js"></script>
