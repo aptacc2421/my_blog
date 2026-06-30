@@ -112,6 +112,20 @@
       color: #b4c8cc;
       text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.45);
     }
+    html[lang="en"] .i18n-zh {
+      display: none;
+    }
+    html[lang="zh-CN"] .i18n-en {
+      display: none;
+    }
+    #list h1.tech-h1-single {
+      font-family: "EB Garamond", "LXGW WenKai", Georgia, serif;
+      font-size: 1rem;
+      font-weight: 600;
+      font-style: italic;
+      letter-spacing: 0.06em;
+      color: #b4c8cc;
+    }
     #list h1.tech-h1 {
       display: flex;
       flex-direction: column;
@@ -530,8 +544,8 @@
 <body>
   <div class="tech-nav-row">
     <div class="tech-nav-links">
-      <a class="nav-back" href="index.html">回门厅<span class="nav-back-en" lang="en"> · Back</span></a>
-      <a class="nav-back-list" href="tech.html">回列表<span class="nav-back-en" lang="en"> · List</span></a>
+      <a class="nav-back" href="index.html"><span class="i18n-zh">回门厅</span><span class="i18n-en" lang="en">Back</span></a>
+      <a class="nav-back-list" href="tech.html"><span class="i18n-zh">回列表</span><span class="i18n-en" lang="en">List</span></a>
     </div>
     <div id="lang-switch" class="tech-lang-switch" aria-label="Language">
       <button type="button" class="tech-lang-btn is-active" data-lang="zh" aria-pressed="true">中文</button>
@@ -541,6 +555,6 @@
   </div>
   <div id="list"></div>
   <article id="article"></article>
-  <script src="assets/tech.js?v=20260630c"></script>
+  <script src="assets/tech.js?v=20260630d"></script>
 </body>
 </html>

@@ -5,7 +5,7 @@
   var LS_LANG = "tech_lang";
   var BLOB_PREFIX = "tech_blob_";
   /* 正文或样式更新后递增，避免浏览器沿用旧的半截 .md 缓存 */
-  var TECH_CACHE_REV = "20260630b";
+  var TECH_CACHE_REV = "20260630d";
 
   var listEl = document.getElementById("list");
   var articleEl = document.getElementById("article");
@@ -85,8 +85,30 @@
       localStorage.setItem(LS_LANG, currentLang);
     } catch (_) {}
     document.documentElement.lang = currentLang === "en" ? "en" : "zh-CN";
+    applyPageChrome();
     syncLangInUrl();
     renderLangSwitch();
+  }
+
+  function applyPageChrome() {
+    document.title = currentLang === "en" ? "Tech" : "技术 · Tech";
+    var listLink = document.querySelector(".nav-back-list");
+    if (listLink) {
+      listLink.href = currentLang === "en" ? "tech.html?lang=en" : "tech.html";
+    }
+  }
+
+  function rowsForDisplay(rows) {
+    if (currentLang !== "en") return rows;
+    return rows.filter(function (row) {
+      return row.titleEn;
+    });
+  }
+
+  function formatListDate(iso) {
+    if (!iso) return "";
+    if (currentLang === "en") return formatWrittenAt(iso, "en");
+    return iso;
   }
 
   function syncLangInUrl() {
@@ -350,32 +372,39 @@
   function renderList(rows) {
     listEl.innerHTML = "";
     var h = document.createElement("h1");
-    h.className = "tech-h1";
-    var hZh = document.createElement("span");
-    hZh.className = "tech-h1-zh";
-    hZh.setAttribute("lang", "zh-CN");
-    hZh.textContent = "技术";
-    var hEn = document.createElement("span");
-    hEn.className = "tech-h1-en";
-    hEn.setAttribute("lang", "en");
-    hEn.textContent = "Tech";
-    h.appendChild(hZh);
-    h.appendChild(hEn);
+    if (currentLang === "en") {
+      h.className = "tech-h1-single";
+      h.setAttribute("lang", "en");
+      h.textContent = "Tech";
+    } else {
+      h.className = "tech-h1";
+      var hZh = document.createElement("span");
+      hZh.className = "tech-h1-zh";
+      hZh.setAttribute("lang", "zh-CN");
+      hZh.textContent = "技术";
+      var hEn = document.createElement("span");
+      hEn.className = "tech-h1-en";
+      hEn.setAttribute("lang", "en");
+      hEn.textContent = "Tech";
+      h.appendChild(hZh);
+      h.appendChild(hEn);
+    }
     listEl.appendChild(h);
-    if (!rows.length) {
-      var pZh = document.createElement("p");
-      pZh.className = "muted";
-      pZh.textContent = "内容将陆续补充。";
-      var pEn = document.createElement("p");
-      pEn.className = "muted muted-en";
-      pEn.setAttribute("lang", "en");
-      pEn.textContent = "Coming soon.";
-      listEl.appendChild(pZh);
-      listEl.appendChild(pEn);
+    var visible = rowsForDisplay(rows);
+    if (!visible.length) {
+      var p = document.createElement("p");
+      p.className = "muted";
+      if (currentLang === "en") {
+        p.setAttribute("lang", "en");
+        p.textContent = "Coming soon.";
+      } else {
+        p.textContent = "内容将陆续补充。";
+      }
+      listEl.appendChild(p);
       return;
     }
     var ul = document.createElement("ul");
-    rows.forEach(function (row) {
+    visible.forEach(function (row) {
       var li = document.createElement("li");
       var a = document.createElement("a");
       a.href = "#";
@@ -392,7 +421,7 @@
         var time = document.createElement("time");
         time.className = "tech-list-date";
         time.dateTime = written;
-        time.textContent = written;
+        time.textContent = formatListDate(written);
         li.appendChild(time);
       }
       ul.appendChild(li);
@@ -415,6 +444,7 @@
 
   currentLang = queryLang();
   document.documentElement.lang = currentLang === "en" ? "en" : "zh-CN";
+  applyPageChrome();
   bindLangSwitch();
   renderLangSwitch();
 
