@@ -8,14 +8,16 @@
   <style>
     /* 技术侧：暗色模式 — 整页一道纵向渐变，随内容高度延展 */
     html {
-      min-height: 100%;
-      /* 与 body::before 渐变顶色一致，避免顶栏 margin 折叠时露出更深色带 */
-      background-color: #2c2826;
+      min-height: 100vh;
+      min-height: 100dvh;
+      /* 渐变末端色，供不足一屏时与下方衔接 */
+      background-color: #161412;
       scroll-behavior: smooth;
     }
     body {
       margin: 0;
-      min-height: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
       position: relative;
       display: flow-root;
       color: #ddd8d0;
@@ -46,7 +48,12 @@
     body::before {
       content: "";
       position: absolute;
-      inset: 0;
+      left: 0;
+      right: 0;
+      top: 0;
+      min-height: 100%;
+      height: max(100%, 100vh);
+      height: max(100%, 100dvh);
       z-index: 0;
       pointer-events: none;
       background:
@@ -56,7 +63,12 @@
     body::after {
       content: "";
       position: absolute;
-      inset: 0;
+      left: 0;
+      right: 0;
+      top: 0;
+      min-height: 100%;
+      height: max(100%, 100vh);
+      height: max(100%, 100dvh);
       z-index: 0;
       pointer-events: none;
       opacity: 0.03;
@@ -529,6 +541,6 @@
   </div>
   <div id="list"></div>
   <article id="article"></article>
-  <script src="assets/tech.js?v=20260630b"></script>
+  <script src="assets/tech.js?v=20260630c"></script>
 </body>
 </html>
