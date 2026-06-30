@@ -2,10 +2,31 @@
   "use strict";
 
   var LS_TECH = "tech_index";
+  var LS_LANG = "tech_lang";
   var BLOB_PREFIX = "tech_blob_";
 
   var listEl = document.getElementById("list");
   var articleEl = document.getElementById("article");
+  var langSwitchEl = document.getElementById("lang-switch");
+
+  var indexRows = [];
+  var currentLang = "zh";
+  var currentRow = null;
+
+  var MONTHS_EN = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
 
   function fetchTimed(url, ms) {
     ms = ms || 8000;
@@ -28,6 +49,8 @@
         map[row.file] = {
           file: row.file,
           title: row.title || (prev && prev.title) || row.file,
+          titleEn: row.titleEn || (prev && prev.titleEn) || "",
+          fileEn: row.fileEn || (prev && prev.fileEn) || "",
           date: row.date || (prev && prev.date) || parseDateFromFile(row.file),
         };
       });
@@ -42,10 +65,68 @@
     return m ? m[1] : "";
   }
 
-  function formatWrittenAt(iso) {
+  function queryLang() {
+    try {
+      var q = new URLSearchParams(window.location.search).get("lang");
+      if (q === "en" || q === "zh") return q;
+    } catch (_) {}
+    try {
+      var stored = localStorage.getItem(LS_LANG);
+      if (stored === "en" || stored === "zh") return stored;
+    } catch (_) {}
+    return "zh";
+  }
+
+  function setLang(lang) {
+    currentLang = lang === "en" ? "en" : "zh";
+    try {
+      localStorage.setItem(LS_LANG, currentLang);
+    } catch (_) {}
+    document.documentElement.lang = currentLang === "en" ? "en" : "zh-CN";
+    syncLangInUrl();
+    renderLangSwitch();
+  }
+
+  function syncLangInUrl() {
+    if (!window.history || !window.history.replaceState) return;
+    try {
+      var u = new URL(window.location.href);
+      if (currentLang === "zh") u.searchParams.delete("lang");
+      else u.searchParams.set("lang", currentLang);
+      window.history.replaceState(null, "", u.pathname + u.search);
+    } catch (_) {}
+  }
+
+  function hasEnglish(row) {
+    return !!(row && row.fileEn);
+  }
+
+  function getTitle(row, lang) {
+    lang = lang || currentLang;
+    if (lang === "en" && row.titleEn) return row.titleEn;
+    return row.title || row.file;
+  }
+
+  function getArticleFile(row, lang) {
+    lang = lang || currentLang;
+    if (lang === "en" && row.fileEn) return row.fileEn;
+    return row.file;
+  }
+
+  function formatWrittenAt(iso, lang) {
     if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "";
     var p = iso.split("-");
-    return p[0] + " 年 " + parseInt(p[1], 10) + " 月 " + parseInt(p[2], 10) + " 日";
+    var y = parseInt(p[0], 10);
+    var m = parseInt(p[1], 10);
+    var d = parseInt(p[2], 10);
+    if (lang === "en") {
+      return MONTHS_EN[m - 1] + " " + d + ", " + y;
+    }
+    return y + " 年 " + m + " 月 " + d + " 日";
+  }
+
+  function writtenAtLabel(lang) {
+    return lang === "en" ? "Written" : "写于";
   }
 
   function articleDate(row) {
@@ -76,7 +157,8 @@
     if (!root) return;
     var h2s = root.querySelectorAll("h2");
     for (var i = 0; i < h2s.length; i++) {
-      if (h2s[i].textContent.trim() === "目录") {
+      var t = h2s[i].textContent.trim();
+      if (t === "目录" || t === "Contents") {
         var ul = h2s[i].nextElementSibling;
         if (ul && ul.tagName === "UL") ul.classList.add("tech-toc");
         break;
@@ -103,8 +185,74 @@
     try {
       var u = new URL(window.location.href);
       u.searchParams.set("file", file);
+      if (currentLang === "en") u.searchParams.set("lang", "en");
+      else u.searchParams.delete("lang");
       window.history.replaceState(null, "", u.pathname + u.search);
     } catch (_) {}
+  }
+
+  function renderLangSwitch() {
+    if (!langSwitchEl) return;
+    langSwitchEl.innerHTML = "";
+    var zhBtn = document.createElement("button");
+    zhBtn.type = "button";
+    zhBtn.className = "tech-lang-btn";
+    zhBtn.textContent = "中文";
+    zhBtn.setAttribute("aria-pressed", currentLang === "zh" ? "true" : "false");
+    if (currentLang === "zh") zhBtn.classList.add("is-active");
+
+    var enBtn = document.createElement("button");
+    enBtn.type = "button";
+    enBtn.className = "tech-lang-btn";
+    enBtn.textContent = "EN";
+    enBtn.setAttribute("aria-pressed", currentLang === "en" ? "true" : "false");
+    if (currentLang === "en") enBtn.classList.add("is-active");
+
+    zhBtn.addEventListener("click", function () {
+      if (currentLang === "zh") return;
+      switchLang("zh");
+    });
+    enBtn.addEventListener("click", function () {
+      if (currentLang === "en") return;
+      switchLang("en");
+    });
+
+    langSwitchEl.appendChild(zhBtn);
+    langSwitchEl.appendChild(document.createTextNode(" "));
+    langSwitchEl.appendChild(enBtn);
+    langSwitchEl.hidden = false;
+  }
+
+  function renderArticleLangSwitch(row) {
+    if (!articleEl || !hasEnglish(row)) return;
+    var bar = document.createElement("div");
+    bar.className = "tech-article-lang";
+    var zhBtn = document.createElement("button");
+    zhBtn.type = "button";
+    zhBtn.className = "tech-lang-btn";
+    zhBtn.textContent = "中文";
+    if (currentLang === "zh") zhBtn.classList.add("is-active");
+    var enBtn = document.createElement("button");
+    enBtn.type = "button";
+    enBtn.className = "tech-lang-btn";
+    enBtn.textContent = "EN";
+    if (currentLang === "en") enBtn.classList.add("is-active");
+    zhBtn.addEventListener("click", function () {
+      if (currentLang !== "zh") switchLang("zh");
+    });
+    enBtn.addEventListener("click", function () {
+      if (currentLang !== "en") switchLang("en");
+    });
+    bar.appendChild(zhBtn);
+    bar.appendChild(document.createTextNode(" · "));
+    bar.appendChild(enBtn);
+    articleEl.insertBefore(bar, articleEl.firstChild);
+  }
+
+  function switchLang(lang) {
+    setLang(lang);
+    renderList(indexRows);
+    if (currentRow) openArticle(currentRow, { keepScroll: true });
   }
 
   function highlightCode(root) {
@@ -204,7 +352,7 @@
       var a = document.createElement("a");
       a.href = "#";
       a.className = "tech-list-title";
-      a.textContent = row.title;
+      a.textContent = getTitle(row, currentLang);
       a.setAttribute("data-file", row.file);
       a.addEventListener("click", function (ev) {
         ev.preventDefault();
@@ -224,35 +372,53 @@
     listEl.appendChild(ul);
   }
 
-  function openArticle(row) {
-    var file = row.file;
+  function openArticle(row, opts) {
+    opts = opts || {};
+    currentRow = row;
+    var file = getArticleFile(row, currentLang);
+    var canonicalFile = row.file;
     articleEl.innerHTML = "";
     loadArticle(file).then(function (md) {
       if (!md.trim()) {
+        var errZh =
+          currentLang === "en"
+            ? "Could not load this file."
+            : "无法加载「" + esc(file) + "」。";
+        var errEn =
+          currentLang === "en"
+            ? ""
+            : "<p class=\"muted muted-en\" lang=\"en\">Could not load this file.</p>";
         articleEl.innerHTML =
-          "<p class=\"muted\">无法加载「" +
-          esc(file) +
-          "」。</p>" +
-          "<p class=\"muted muted-en\" lang=\"en\">Could not load this file.</p>";
+          "<p class=\"muted\">" + errZh + "</p>" + errEn;
         return;
       }
       var html = parseMd(md);
       var written = articleDate(row);
       if (written) {
         html +=
-          "<p class=\"tech-written-at\">写于 " +
-          esc(formatWrittenAt(written)) +
+          "<p class=\"tech-written-at\">" +
+          esc(writtenAtLabel(currentLang)) +
+          " " +
+          esc(formatWrittenAt(written, currentLang)) +
           "</p>";
       }
       articleEl.innerHTML = html;
+      if (hasEnglish(row)) renderArticleLangSwitch(row);
       highlightCode(articleEl);
       decorateArticle(articleEl);
     });
-    enterReadMode(file);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    enterReadMode(canonicalFile);
+    if (!opts.keepScroll) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   }
 
+  currentLang = queryLang();
+  document.documentElement.lang = currentLang === "en" ? "en" : "zh-CN";
+  renderLangSwitch();
+
   loadIndex().then(function (rows) {
+    indexRows = rows;
     renderList(rows);
     var file = queryFile();
     if (!file) {

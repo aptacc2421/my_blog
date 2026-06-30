@@ -457,14 +457,64 @@
       margin-left: 0.35em;
       letter-spacing: 0.04em;
     }
+    .tech-nav-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem 1.25rem;
+      margin: 1rem 1.25rem 0;
+    }
+    .tech-nav-row .nav-back,
+    .tech-nav-row .nav-back-list {
+      margin: 0;
+    }
+    #lang-switch {
+      margin-left: auto;
+      font-family: "EB Garamond", "LXGW WenKai", Georgia, serif;
+      font-size: 0.78rem;
+      font-style: italic;
+    }
+    #lang-switch[hidden] {
+      display: none;
+    }
+    .tech-lang-btn {
+      font: inherit;
+      font-style: italic;
+      color: #9a9187;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid transparent;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .tech-lang-btn:hover {
+      color: #ddd8d0;
+    }
+    .tech-lang-btn.is-active {
+      color: #7ec8c4;
+      border-bottom-color: rgba(126, 200, 196, 0.45);
+    }
+    #article .tech-article-lang {
+      margin: 0 0 1.25em;
+      text-align: right;
+      font-family: "EB Garamond", "LXGW WenKai", Georgia, serif;
+      font-size: 0.78rem;
+      font-style: italic;
+      color: #9a9187;
+    }
   </style>
   <script src="assets/md-unfussy.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
 </head>
 <body>
-  <a class="nav-back" href="index.html">回门厅<span class="nav-back-en" lang="en"> · Back</span></a>
-  <a class="nav-back-list" href="tech.html">回列表<span class="nav-back-en" lang="en"> · List</span></a>
+  <div class="tech-nav-row">
+    <a class="nav-back" href="index.html">回门厅<span class="nav-back-en" lang="en"> · Back</span></a>
+    <a class="nav-back-list" href="tech.html">回列表<span class="nav-back-en" lang="en"> · List</span></a>
+    <div id="lang-switch" hidden aria-label="Language"></div>
+  </div>
   <div id="list"></div>
   <article id="article"></article>
   <script src="assets/tech.js"></script>
