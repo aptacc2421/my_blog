@@ -223,32 +223,6 @@
     langSwitchEl.hidden = false;
   }
 
-  function renderArticleLangSwitch(row) {
-    if (!articleEl || !hasEnglish(row)) return;
-    var bar = document.createElement("div");
-    bar.className = "tech-article-lang";
-    var zhBtn = document.createElement("button");
-    zhBtn.type = "button";
-    zhBtn.className = "tech-lang-btn";
-    zhBtn.textContent = "中文";
-    if (currentLang === "zh") zhBtn.classList.add("is-active");
-    var enBtn = document.createElement("button");
-    enBtn.type = "button";
-    enBtn.className = "tech-lang-btn";
-    enBtn.textContent = "EN";
-    if (currentLang === "en") enBtn.classList.add("is-active");
-    zhBtn.addEventListener("click", function () {
-      if (currentLang !== "zh") switchLang("zh");
-    });
-    enBtn.addEventListener("click", function () {
-      if (currentLang !== "en") switchLang("en");
-    });
-    bar.appendChild(zhBtn);
-    bar.appendChild(document.createTextNode(" · "));
-    bar.appendChild(enBtn);
-    articleEl.insertBefore(bar, articleEl.firstChild);
-  }
-
   function switchLang(lang) {
     setLang(lang);
     renderList(indexRows);
@@ -403,7 +377,6 @@
           "</p>";
       }
       articleEl.innerHTML = html;
-      if (hasEnglish(row)) renderArticleLangSwitch(row);
       highlightCode(articleEl);
       decorateArticle(articleEl);
     });
