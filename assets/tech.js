@@ -72,6 +72,41 @@
       });
   }
 
+  function decorateArticle(root) {
+    if (!root) return;
+    var h2s = root.querySelectorAll("h2");
+    for (var i = 0; i < h2s.length; i++) {
+      if (h2s[i].textContent.trim() === "目录") {
+        var ul = h2s[i].nextElementSibling;
+        if (ul && ul.tagName === "UL") ul.classList.add("tech-toc");
+        break;
+      }
+    }
+    root.querySelectorAll("table").forEach(function (table) {
+      if (
+        table.parentElement &&
+        table.parentElement.classList.contains("tech-table-wrap")
+      ) {
+        return;
+      }
+      var wrap = document.createElement("div");
+      wrap.className = "tech-table-wrap";
+      table.parentNode.insertBefore(wrap, table);
+      wrap.appendChild(table);
+    });
+  }
+
+  function enterReadMode(file) {
+    document.body.classList.add("tech-read");
+    listEl.setAttribute("hidden", "");
+    if (!file || !window.history || !window.history.replaceState) return;
+    try {
+      var u = new URL(window.location.href);
+      u.searchParams.set("file", file);
+      window.history.replaceState(null, "", u.pathname + u.search);
+    } catch (_) {}
+  }
+
   function highlightCode(root) {
     if (!window.hljs || !root) return;
     root.querySelectorAll("pre code").forEach(function (el) {
@@ -211,14 +246,20 @@
       }
       articleEl.innerHTML = html;
       highlightCode(articleEl);
+      decorateArticle(articleEl);
     });
-    window.scrollTo({ top: articleEl.offsetTop - 8, behavior: "smooth" });
+    enterReadMode(file);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   loadIndex().then(function (rows) {
     renderList(rows);
     var file = queryFile();
-    if (!file) return;
+    if (!file) {
+      document.body.classList.remove("tech-read");
+      listEl.removeAttribute("hidden");
+      return;
+    }
     var row = rows.filter(function (r) {
       return r.file === file;
     })[0];

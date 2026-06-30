@@ -10,6 +10,7 @@
     html {
       min-height: 100%;
       background-color: #161412;
+      scroll-behavior: smooth;
     }
     body {
       margin: 0;
@@ -20,6 +21,25 @@
       font-size: 15px;
       line-height: 1.55;
       background: transparent;
+      --tech-serif-zh: "LXGW WenKai Screen", "LXGW WenKai", "PingFang SC", serif;
+      --tech-serif-en: "EB Garamond", Georgia, serif;
+      --tech-mono: ui-monospace, "Cascadia Code", Consolas, "DejaVu Sans Mono", monospace;
+    }
+    body.tech-read #list {
+      display: none;
+    }
+    body.tech-read #article {
+      max-width: 42rem;
+      padding-top: 0.5rem;
+    }
+    .nav-back-list {
+      display: none;
+      margin: 1rem 0 0 1.25rem;
+      font-size: 0.82rem;
+      color: #9a9590;
+    }
+    body.tech-read .nav-back-list {
+      display: inline-block;
     }
     body::before {
       content: "";
@@ -127,9 +147,54 @@
       max-width: 46rem;
       margin: 0 auto 3rem;
       padding: 0 1.25rem 3rem;
+      font-family: var(--tech-serif-zh), var(--tech-serif-en);
+      font-size: clamp(0.92rem, 1.05vw, 1rem);
+      line-height: 1.78;
+      letter-spacing: 0.02em;
     }
     #article:empty {
       display: none;
+    }
+    #article a[id] + h1,
+    #article a[id] + h2 {
+      scroll-margin-top: 1.25rem;
+    }
+    #article h2:has(+ ul.tech-toc) {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #9a9187;
+      letter-spacing: 0.1em;
+      margin: 0.25em 0 0.4em;
+    }
+    #article ul.tech-toc {
+      margin: 0 0 1.75em;
+      padding: 0.85em 1em 0.65em;
+      border: 1px solid rgba(255, 240, 230, 0.1);
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.12);
+      list-style: none;
+      font-family: var(--tech-mono);
+      font-size: 0.88em;
+      line-height: 1.55;
+    }
+    #article ul.tech-toc ul {
+      margin: 0.25em 0 0.15em;
+      padding-left: 1.15em;
+      list-style: none;
+      border: none;
+      background: transparent;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    #article ul.tech-toc li {
+      margin: 0.28em 0;
+    }
+    #article ul.tech-toc a {
+      text-decoration: none;
+      border-bottom: 1px solid rgba(126, 200, 196, 0.25);
+    }
+    #article ul.tech-toc a:hover {
+      border-bottom-color: #a8ebe6;
     }
     #article h1,
     #article h2,
@@ -137,20 +202,20 @@
     #article h4,
     #article h5,
     #article h6 {
-      font-family: inherit;
+      font-family: var(--tech-serif-zh), var(--tech-serif-en);
       font-weight: 600;
-      color: #c8dce0;
-      margin: 1.25em 0 0.5em;
-      line-height: 1.35;
+      color: #ddd8d0;
+      margin: 1.85em 0 0.55em;
+      line-height: 1.4;
     }
     #article h1:first-child,
     #article h2:first-child,
     #article h3:first-child {
       margin-top: 0;
     }
-    #article h1 { font-size: 1.35rem; }
-    #article h2 { font-size: 1.15rem; }
-    #article h3 { font-size: 1.05rem; }
+    #article h1 { font-size: 1.55rem; color: #e8e2da; }
+    #article h2 { font-size: 1.2rem; color: #ddd8d0; }
+    #article h3 { font-size: 1.05rem; color: #d0cbc4; }
     #article h4 { font-size: 1rem; color: #b8ccd0; }
     #article h5 { font-size: 0.95rem; color: #a8bcc0; }
     #article h6 { font-size: 0.9rem; color: #98acb0; }
@@ -193,15 +258,24 @@
       margin-bottom: 0;
     }
     #article hr {
-      margin: 1.5em 0;
+      margin: 2.25em auto;
+      max-width: 5rem;
       border: none;
-      border-top: 1px solid rgba(255, 240, 230, 0.15);
+      border-top: 1px solid rgba(255, 240, 230, 0.1);
+    }
+    #article .tech-table-wrap {
+      margin: 0.75em 0 1em;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
     #article table {
       width: 100%;
-      margin: 0.75em 0 1em;
+      min-width: 28rem;
+      margin: 0;
       border-collapse: collapse;
-      font-size: 0.92em;
+      font-family: var(--tech-mono);
+      font-size: 0.84em;
+      line-height: 1.45;
     }
     #article th,
     #article td {
@@ -234,7 +308,7 @@
       vertical-align: middle;
     }
     #article code {
-      font-family: inherit;
+      font-family: var(--tech-mono);
       font-size: 0.92em;
       background: rgba(34, 32, 30, 0.85);
       color: #c5e8e4;
@@ -243,7 +317,7 @@
       border: 1px solid rgba(255, 245, 235, 0.08);
     }
     #article pre {
-      font-family: inherit;
+      font-family: var(--tech-mono);
       background: #1e1c1a;
       color: #ddd8d0;
       border: 1px solid rgba(255, 245, 235, 0.08);
@@ -356,6 +430,7 @@
 </head>
 <body>
   <a class="nav-back" href="index.html">回门厅<span class="nav-back-en" lang="en"> · Back</span></a>
+  <a class="nav-back-list" href="tech.html">回列表<span class="nav-back-en" lang="en"> · List</span></a>
   <div id="list"></div>
   <article id="article"></article>
   <script src="assets/tech.js"></script>
