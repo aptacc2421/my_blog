@@ -136,6 +136,15 @@ body.gate .gate-link-life .gate-link-title,
 body.gate .gate-link-tech .gate-link-title {
   font-size: 1.35rem;
   font-weight: 500;
+  color: var(--gold);
+  text-decoration: none;
+}
+
+body.gate .gate-link-life .gate-link-title:hover,
+body.gate .gate-link-tech .gate-link-title:hover {
+  color: var(--gold-bright);
+  text-decoration: underline;
+  text-decoration-color: var(--brick);
 }
 
 body.gate .gate-link-life .gate-link-tag,
@@ -150,20 +159,14 @@ body.gate .gate-link-tech .gate-link-tag {
   transition: color 0.2s ease;
 }
 
-body.gate .gate-link-life:hover .gate-link-tag,
-body.gate .gate-link-tech:hover .gate-link-tag {
+body.gate .gate-link-life .gate-link-tag:hover,
+body.gate .gate-link-tech .gate-link-tag:hover {
   color: var(--text-ash);
 }
 
 body.gate .gate-link-life:hover,
 body.gate .gate-link-tech:hover {
   text-decoration: none;
-}
-
-body.gate .gate-link-life:hover .gate-link-title,
-body.gate .gate-link-tech:hover .gate-link-title {
-  text-decoration: underline;
-  text-decoration-color: var(--brick);
 }
 
 /* —— 生活侧 —— */
