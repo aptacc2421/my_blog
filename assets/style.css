@@ -102,9 +102,11 @@ body.gate .gate-intro .gate-intro-tech:hover {
 
 body.gate .gate-links {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2.75rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2.25rem;
 }
 
 body.gate a {
