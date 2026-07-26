@@ -140,8 +140,8 @@ body.gate .gate-link-tech .gate-link-title {
   text-decoration: none;
 }
 
-body.gate .gate-link-life .gate-link-title:hover,
-body.gate .gate-link-tech .gate-link-title:hover {
+body.gate .gate-link-life:hover .gate-link-title,
+body.gate .gate-link-tech:hover .gate-link-title {
   color: var(--gold-bright);
   text-decoration: underline;
   text-decoration-color: var(--brick);
@@ -159,8 +159,8 @@ body.gate .gate-link-tech .gate-link-tag {
   transition: color 0.2s ease;
 }
 
-body.gate .gate-link-life .gate-link-tag:hover,
-body.gate .gate-link-tech .gate-link-tag:hover {
+body.gate .gate-link-life:hover .gate-link-tag,
+body.gate .gate-link-tech:hover .gate-link-tag {
   color: var(--text-ash);
 }
 
