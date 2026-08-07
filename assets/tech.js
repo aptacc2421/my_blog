@@ -99,8 +99,15 @@
   }
 
   function rowsForDisplay(rows) {
-    if (currentLang !== "en") return rows;
-    return rows.filter(function (row) {
+    var sorted = rows.slice().sort(function (a, b) {
+      var da = articleDate(a) || "";
+      var db = articleDate(b) || "";
+      if (da < db) return 1;
+      if (da > db) return -1;
+      return 0;
+    });
+    if (currentLang !== "en") return sorted;
+    return sorted.filter(function (row) {
       return row.titleEn;
     });
   }
